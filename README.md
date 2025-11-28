@@ -1,6 +1,6 @@
 # eBay E-commerce Test Automation Framework
 
-[![Playwright Tests CI](https://github.com/YOUR_USERNAME/ness-playwright-hw/actions/workflows/playwright-ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/ness-playwright-hw/actions/workflows/playwright-ci.yml)
+[![Playwright Tests CI](https://github.com/Edishni/ness-playwright-hw/actions/workflows/playwright-ci.yml/badge.svg)](https://github.com/Edishni/ness-playwright-hw/actions/workflows/playwright-ci.yml)
 
 A robust, enterprise-grade test automation framework built with Playwright and TypeScript for eBay e-commerce testing. Features smart locator strategies, parallel execution, and comprehensive cart workflow testing.
 
@@ -103,7 +103,7 @@ ness-playwright-hw/
 
 ### Installation
 ```bash
-git clone https://github.com/YOUR_USERNAME/ness-playwright-hw.git
+git clone https://github.com/Edishni/ness-playwright-hw.git
 cd ness-playwright-hw
 npm install
 npx playwright install
@@ -286,9 +286,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙋‍♂️ Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/ness-playwright-hw/issues)
-- **Documentation**: [Project Wiki](https://github.com/YOUR_USERNAME/ness-playwright-hw/wiki)
-- **CI Status**: [GitHub Actions](https://github.com/YOUR_USERNAME/ness-playwright-hw/actions)
+- **Issues**: [GitHub Issues](https://github.com/Edishni/ness-playwright-hw/issues)
+- **Documentation**: [Project Wiki](https://github.com/Edishni/ness-playwright-hw/wiki)
+- **CI Status**: [GitHub Actions](https://github.com/Edishni/ness-playwright-hw/actions)
 
 ---
 
