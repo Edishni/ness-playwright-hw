@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
-        browser: [chromium]  # Start with just chromium for debugging
+        browser: [chromium, firefox, webkit]  # Test all browsers with simple test
     
     steps:
     - uses: actions/checkout@v4
@@ -72,8 +72,10 @@ jobs:
         echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
         echo "| Browser | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
-        if [ -d "test-results-chromium" ]; then
-          echo "| chromium | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "| chromium | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
-        fi
+        for browser in chromium firefox webkit; do
+          if [ -d "test-results-$browser" ]; then
+            echo "| $browser | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| $browser | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
