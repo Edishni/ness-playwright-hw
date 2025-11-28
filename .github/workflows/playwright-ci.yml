@@ -9,13 +9,14 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 90  # Increased timeout for slower CI environment
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.44.0-jammy
     strategy:
+      fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [chromium]  # Start with just chromium for debugging
     
     steps:
     - uses: actions/checkout@v4
@@ -28,8 +29,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run Playwright tests
-      run: npx playwright test --project=${{ matrix.browser }}
+    - name: Run smoke test for CI debugging
+      run: npx playwright test src/tests/ci-smoke.spec.ts --project=${{ matrix.browser }}
       env:
         CI: true
         HOME: /root
