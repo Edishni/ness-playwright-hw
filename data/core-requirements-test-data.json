@@ -1,0 +1,108 @@
+{
+  "searchScenarios": [
+    {
+      "id": "scenario-1",
+      "name": "Search shoes under budget",
+      "query": "shoes",
+      "maxPrice": 400,
+      "limit": 3,
+      "expectedMinResults": 1
+    },
+    {
+      "id": "scenario-2",
+      "name": "Search laptop under budget",
+      "query": "laptop",
+      "maxPrice": 500,
+      "limit": 3,
+      "expectedMinResults": 1
+    },
+    {
+      "id": "scenario-3",
+      "name": "Search watch under budget",
+      "query": "watch",
+      "maxPrice": 150,
+      "limit": 2,
+      "expectedMinResults": 1
+    },
+    {
+      "id": "scenario-4",
+      "name": "Search camera under budget",
+      "query": "camera",
+      "maxPrice": 300,
+      "limit": 3,
+      "expectedMinResults": 1
+    },
+    {
+      "id": "scenario-5",
+      "name": "Multi-page search with low price",
+      "query": "sticker",
+      "maxPrice": 9,
+      "limit": 25,
+      "expectedMinResults": 20
+    }
+  ],
+  "budgetTests": [
+    {
+      "id": "budget-1",
+      "name": "Single item budget check",
+      "budgetPerItem": 220,
+      "itemsCount": 1,
+      "expectedMaxTotal": 220
+    },
+    {
+      "id": "budget-2",
+      "name": "Multiple items budget check",
+      "budgetPerItem": 220,
+      "itemsCount": 3,
+      "expectedMaxTotal": 660
+    },
+    {
+      "id": "budget-3",
+      "name": "High budget single item",
+      "budgetPerItem": 500,
+      "itemsCount": 1,
+      "expectedMaxTotal": 500
+    },
+    {
+      "id": "budget-4",
+      "name": "Low budget multiple items",
+      "budgetPerItem": 50,
+      "itemsCount": 5,
+      "expectedMaxTotal": 250
+    }
+  ],
+  "cartTests": [
+    {
+      "id": "cart-1",
+      "name": "Add single item to cart",
+      "itemsToAdd": 1
+    },
+    {
+      "id": "cart-2",
+      "name": "Add multiple items to cart",
+      "itemsToAdd": 3
+    },
+    {
+      "id": "cart-3",
+      "name": "Add max items to cart",
+      "itemsToAdd": 7
+    }
+  ],
+  "variantTests": [
+    {
+      "id": "variant-1",
+      "name": "Random size selection",
+      "variantType": "size"
+    },
+    {
+      "id": "variant-2",
+      "name": "Random color selection",
+      "variantType": "color"
+    },
+    {
+      "id": "variant-3",
+      "name": "Random quantity selection",
+      "variantType": "quantity"
+    }
+  ]
+}

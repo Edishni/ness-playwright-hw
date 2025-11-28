@@ -1,0 +1,298 @@
+{
+  "common": {
+    "searchInput": [
+      { "type": "css", "value": "input#gh-ac" },
+      { "type": "xpath", "value": "//input[@id='gh-ac']" },
+      { "type": "placeholder", "value": "Search for anything" }
+    ],
+    "searchButton": [
+      { "type": "css", "value": "button#gh-search-btn" },
+      { "type": "xpath", "value": "//button[@id='gh-search-btn']" },
+      { "type": "css", "value": "button[type='submit'].btn--primary" }
+    ],
+    "cartLink": [
+      { "type": "css", "value": "a#gh-cart" },
+      { "type": "xpath", "value": "//a[@id='gh-cart']" },
+      { "type": "css", "value": "a[href*='cart']" }
+    ],
+    "signInButton": [
+      { "type": "text", "value": "Sign in" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Sign in')]" },
+      { "type": "css", "value": "a[_sp*='signin']" }
+    ],
+    "myEbayLink": [
+      { "type": "text", "value": "My eBay" },
+      { "type": "xpath", "value": "//a[contains(text(), 'My eBay')]" },
+      { "type": "css", "value": "a[title='My eBay']" }
+    ]
+  },
+  "searchResults": {
+    "resultsContainer": [
+      { "type": "css", "value": "ul.srp-results" },
+      { "type": "xpath", "value": "//ul[contains(@class, 'srp-results')]" }
+    ],
+    "resultItem": [
+      { "type": "css", "value": "li.s-card" },
+      { "type": "xpath", "value": "//li[contains(@class, 's-card')]" }
+    ],
+    "itemLink": [
+      { "type": "css", "value": "a.s-card__link" },
+      { "type": "xpath", "value": "//a[contains(@class, 's-card__link')]" }
+    ],
+    "itemPrice": [
+      { "type": "css", "value": "span.s-card__price" },
+      { "type": "xpath", "value": "//span[contains(@class, 's-card__price')]" },
+      { "type": "css", "value": ".s-card__attribute-row .s-card__price" }
+    ],
+    "itemPriceRange": [
+      { "type": "css", "value": "div.s-card__attribute-row span" },
+      { "type": "xpath", "value": "//div[contains(@class, 's-card__attribute-row')]//span" }
+    ],
+    "itemTitle": [
+      { "type": "css", "value": ".s-card__title" },
+      { "type": "xpath", "value": "//div[contains(@class, 's-card__title')]" }
+    ],
+    "itemCondition": [
+      { "type": "css", "value": ".s-card__info" },
+      { "type": "xpath", "value": "//div[contains(@class, 's-card__info')]" },
+      { "type": "css", "value": ".SECONDARY_INFO" }
+    ],
+    "itemRating": [
+      { "type": "css", "value": ".s-card__reviews" },
+      { "type": "xpath", "value": "//span[contains(@class, 's-card__reviews')]" },
+      { "type": "css", "value": "div.b-star-rating" }
+    ],
+    "itemImage": [
+      { "type": "css", "value": ".s-card__image img" },
+      { "type": "xpath", "value": "//div[contains(@class, 's-card__image')]//img" },
+      { "type": "css", "value": "img[src*='ebayimg']" }
+    ],
+    "freeShippingBadge": [
+      { "type": "text", "value": "Free shipping" },
+      { "type": "xpath", "value": "//span[contains(text(), 'Free shipping')]" }
+    ],
+    "filterSidebar": [
+      { "type": "css", "value": "div.srp-left-panel" },
+      { "type": "xpath", "value": "//div[contains(@class, 'srp-left-panel')]" }
+    ],
+    "minPriceInput": [
+      { "type": "css", "value": "div.price-range:nth-of-type(1) input.textbox__control" },
+      { "type": "xpath", "value": "(//div[contains(@class, 'price-range')])[1]//input[contains(@class, 'textbox__control')]" },
+      { "type": "css", "value": "div.price-range:first-of-type input" }
+    ],
+    "maxPriceInput": [
+      { "type": "css", "value": "div.price-range:nth-of-type(2) input.textbox__control" },
+      { "type": "xpath", "value": "(//div[contains(@class, 'price-range')])[2]//input[contains(@class, 'textbox__control')]" },
+      { "type": "css", "value": "div.price-range:last-of-type input" }
+    ],
+    "priceRangeContainer": [
+      { "type": "css", "value": ".price-range" },
+      { "type": "xpath", "value": "//div[contains(@class, 'price-range')]" }
+    ],
+    "priceRangeApplyButton": [
+      { "type": "css", "value": "button[aria-label='Submit price range']" },
+      { "type": "xpath", "value": "//button[@aria-label='Submit price range']" },
+      { "type": "css", "value": ".x-refine__block-button.icon-btn[aria-label='Submit price range']" },
+      { "type": "css", "value": ".price-range button[type='button'][aria-label*='Submit']" }
+    ],
+    "applyFiltersButton": [
+      { "type": "text", "value": "Apply" },
+      { "type": "xpath", "value": "//button[contains(text(), 'Apply')]" },
+      { "type": "css", "value": "button[type='submit']" }
+    ],
+    "sortDropdown": [
+      { "type": "css", "value": "button[aria-label*='Sort']" },
+      { "type": "xpath", "value": "//button[contains(@aria-label, 'Sort')]" },
+      { "type": "css", "value": ".srp-controls__sort button" }
+    ],
+    "paginationNextButton": [
+      { "type": "css", "value": "a.pagination__next" },
+      { "type": "xpath", "value": "//a[contains(@class, 'pagination__next')]" },
+      { "type": "css", "value": "a[aria-label='Go to next search page']" }
+    ],
+    "paginationPreviousButton": [
+      { "type": "css", "value": "a.pagination__previous" },
+      { "type": "xpath", "value": "//a[contains(@class, 'pagination__previous')]" },
+      { "type": "css", "value": "a[aria-label='Go to previous search page']" }
+    ]
+  },
+  "product": {
+    "productTitle": [
+      { "type": "css", "value": "h1.x-item-title__mainTitle" },
+      { "type": "xpath", "value": "//h1[contains(@class, 'x-item-title__mainTitle')]" }
+    ],
+    "productPrice": [
+      { "type": "css", "value": ".x-price-primary span.ux-textspans" },
+      { "type": "xpath", "value": "//div[contains(@class, 'x-price-primary')]//span[contains(@class, 'ux-textspans')]" }
+    ],
+    "addToCartButton": [
+      { "type": "css", "value": "[data-testid='x-atc-cta-btn']" },
+      { "type": "role", "value": "link", "name": "Add to cart" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Add to cart')]" }
+    ],
+    "buyNowButton": [
+      { "type": "role", "value": "link", "name": "Buy It Now" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Buy It Now')]" }
+    ],
+    "productCondition": [
+      { "type": "xpath", "value": "//span[contains(text(), 'New') or contains(text(), 'Used')]" },
+      { "type": "css", "value": ".x-item-condition-text" }
+    ],
+    "quantityInput": [
+      { "type": "css", "value": "input#qtyTextBox" },
+      { "type": "xpath", "value": "//input[@id='qtyTextBox']" },
+      { "type": "css", "value": "input[name='quantity']" }
+    ],
+    "productImage": [
+      { "type": "css", "value": ".ux-image-carousel-item img" },
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-image-carousel')]//img" }
+    ],
+    "sellerInfo": [
+      { "type": "css", "value": ".x-sellercard-atf" },
+      { "type": "xpath", "value": "//div[contains(@class, 'x-sellercard-atf')]" }
+    ],
+    "sellerName": [
+      { "type": "css", "value": ".ux-seller-section__item--seller a" },
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-seller-section__item--seller')]//a" }
+    ],
+    "sellerRating": [
+      { "type": "css", "value": ".ux-seller-section__item--seller span" },
+      { "type": "xpath", "value": "//span[contains(@class, 'ux-textspans--BOLD')]" }
+    ],
+    "shippingInfo": [
+      { "type": "css", "value": ".ux-labels-values--shipping" },
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-labels-values--shipping')]" }
+    ],
+    "itemSpecifics": [
+      { "type": "css", "value": ".ux-layout-section--itemDetails" },
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-layout-section--itemDetails')]" }
+    ],
+    "productDescription": [
+      { "type": "css", "value": "#viTabs_0_panel" },
+      { "type": "xpath", "value": "//div[@id='viTabs_0_panel']" }
+    ],
+    "watchlistButton": [
+      { "type": "role", "value": "button", "name": "Add to watchlist" },
+      { "type": "xpath", "value": "//button[contains(text(), 'Add to watchlist')]" }
+    ],
+    "shareButton": [
+      { "type": "role", "value": "button", "name": "Share" },
+      { "type": "xpath", "value": "//button[contains(@aria-label, 'Share')]" }
+    ],
+    "contactSellerButton": [
+      { "type": "text", "value": "Contact seller" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Contact seller')]" }
+    ],
+    "returnPolicyLink": [
+      { "type": "text", "value": "Returns" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Returns')]" }
+    ]
+  },
+  "cart": {
+    "cartContainer": [
+      { "type": "css", "value": "main[role='main']" },
+      { "type": "xpath", "value": "//main[@role='main']" }
+    ],
+    "cartItem": [
+      { "type": "css", "value": "[data-test-id='cart-item']" },
+      { "type": "xpath", "value": "//div[contains(@class, 'item-card')]" }
+    ],
+    "cartItemTitle": [
+      { "type": "css", "value": ".item-title a" },
+      { "type": "xpath", "value": "//div[contains(@class, 'item-title')]//a" }
+    ],
+    "cartItemPrice": [
+      { "type": "css", "value": ".item-price" },
+      { "type": "xpath", "value": "//span[contains(@class, 'item-price')]" }
+    ],
+    "cartSubtotal": [
+      { "type": "css", "value": "[data-test-id='SUBTOTAL']" },
+      { "type": "xpath", "value": "//div[@data-test-id='SUBTOTAL']" },
+      { "type": "css", "value": ".val-col.total-row[data-test-id='SUBTOTAL']" }
+    ],
+    "cartTotal": [
+      { "type": "css", "value": "[data-test-id='TOTAL']" },
+      { "type": "xpath", "value": "//div[@data-test-id='TOTAL']" }
+    ],
+    "proceedToCheckoutButton": [
+      { "type": "role", "value": "button", "name": "Go to checkout" },
+      { "type": "xpath", "value": "//button[contains(text(), 'Go to checkout')]" },
+      { "type": "css", "value": "button[data-test-id='cart-checkout-btn']" }
+    ],
+    "removeItemButton": [
+      { "type": "role", "value": "button", "name": "Remove" },
+      { "type": "xpath", "value": "//button[contains(@aria-label, 'Remove')]" }
+    ],
+    "continueShoppingButton": [
+      { "type": "text", "value": "Continue shopping" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Continue shopping')]" }
+    ],
+    "addedToCartDialog": [
+      { "type": "css", "value": ".lightbox-dialog__window" },
+      { "type": "xpath", "value": "//div[contains(@class, 'lightbox-dialog__window')]" }
+    ],
+    "addedToCartHeader": [
+      { "type": "css", "value": ".ux-overlay__header:has-text('Added to cart')" },
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-overlay__header') and contains(text(), 'Added to cart')]" }
+    ],
+    "dialogCloseButton": [
+      { "type": "css", "value": "button.lightbox-dialog__close[aria-label='Close dialog']" },
+      { "type": "xpath", "value": "//button[contains(@class, 'lightbox-dialog__close') and @aria-label='Close dialog']" }
+    ],
+    "dialogParentFromHeader": [
+      { "type": "xpath", "value": "xpath=ancestor::*[contains(@class, 'lightbox-dialog__window')]" }
+    ],
+    "closeButtonWithinDialog": [
+      { "type": "css", "value": "button.lightbox-dialog__close" },
+      { "type": "xpath", "value": ".//button[contains(@class, 'lightbox-dialog__close')]" }
+    ],
+    "cartBadgeCount": [
+      { "type": "css", "value": "#gh-cart .badge" },
+      { "type": "xpath", "value": "//a[@id='gh-cart']//span[contains(@class, 'badge')]" },
+      { "type": "css", "value": "a#gh-cart [data-test-id='cart-count']" }
+    ]
+  },
+  "variants": {
+    "variantSelectButton": [
+      { "type": "css", "value": "button.listbox-button__control:has(span.btn__text:text('Select'))" },
+      { "type": "xpath", "value": "//button[contains(@class, 'listbox-button__control') and .//span[contains(@class, 'btn__text') and text()='Select']]" }
+    ],
+    "variantSelectButtonLabel": [
+      { "type": "css", "value": "span.btn__label" },
+      { "type": "xpath", "value": "//span[contains(@class, 'btn__label')]" }
+    ],
+    "variantDropdownOpen": [
+      { "type": "css", "value": "div[role='listbox']" },
+      { "type": "xpath", "value": "//div[@role='listbox']" }
+    ],
+    "variantFirstOption": [
+      { "type": "css", "value": "div[role='option']:not([aria-disabled='true'])" },
+      { "type": "xpath", "value": ".//div[@role='option' and not(@aria-disabled='true')]" }
+    ],
+    "variantAllOptions": [
+      { "type": "css", "value": "div[role='option']" },
+      { "type": "xpath", "value": ".//div[@role='option']" }
+    ],
+    "variantOptionValue": [
+      { "type": "css", "value": "span.listbox__value" },
+      { "type": "xpath", "value": "//span[contains(@class, 'listbox__value')]" }
+    ]
+  },
+  "fallback": {
+    "addToCartButtons": [
+      { "type": "css", "value": "[data-testid='x-atc-action']" },
+      { "type": "role", "value": "button", "name": "Add to cart" },
+      { "type": "xpath", "value": "//a[contains(text(), 'Add to cart')]" }
+    ],
+    "cartButtons": [
+      { "type": "css", "value": "a#gh-cart" },
+      { "type": "xpath", "value": "//a[@id='gh-cart']" },
+      { "type": "css", "value": "a[href*='cart']" }
+    ],
+    "cartTotalElements": [
+      { "type": "css", "value": "[data-test-id='SUBTOTAL']" },
+      { "type": "xpath", "value": "//div[@data-test-id='SUBTOTAL']" }
+
+    ]
+  }
+}
