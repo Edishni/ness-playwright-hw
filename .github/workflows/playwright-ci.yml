@@ -30,7 +30,7 @@ jobs:
       run: npm ci
     
     - name: Run CI-optimized tests only
-      run: npx playwright test src/tests/ci-single.spec.ts --project=${{ matrix.browser }} --reporter=list --verbose
+      run: npx playwright test src/tests/ci-single.spec.ts --project=${{ matrix.browser }} --reporter=list
       env:
         CI: true
         HOME: /root
