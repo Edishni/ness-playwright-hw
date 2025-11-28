@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
     testDir: 'src/tests',
     testMatch: '**/*.spec.ts', // Let CLI specify which tests to run
-    testIgnore: process.env.CI ? ['**/core-requirements.spec.ts'] : ['**/temp-tests/**'], // Skip complex tests in CI
+    testIgnore: process.env.CI ? ['**/temp-tests/**'] : ['**/temp-tests/**'], // Allow core tests in CI
     timeout: process.env.CI ? 5 * 60 * 1000 : 10 * 60 * 1000, // 5 min in CI, 10 min local
     expect: { timeout: process.env.CI ? 15000 : 5000 }, // Longer waits in CI
     reporter: process.env.CI ? [['github'], ['html']] : [['list'], ['html']],

@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 90  # Increased timeout for slower CI environment
+    timeout-minutes: 120  # Increased timeout for comprehensive tests
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.44.0-jammy
@@ -29,8 +29,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run CI-optimized tests only
-      run: npx playwright test src/tests/ci-single.spec.ts --project=${{ matrix.browser }} --reporter=list
+    - name: Run Core Requirements Tests
+      run: npx playwright test src/tests/core-requirements.spec.ts --project=${{ matrix.browser }} --reporter=list
       env:
         CI: true
         HOME: /root
