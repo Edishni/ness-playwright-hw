@@ -29,8 +29,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run CI-optimized tests 
-      run: npx playwright test src/tests/ci-smoke.spec.ts --project=${{ matrix.browser }} --reporter=list
+    - name: Run CI-optimized tests only
+      run: npx playwright test src/tests/ci-single.spec.ts --project=${{ matrix.browser }} --reporter=list --verbose
       env:
         CI: true
         HOME: /root
