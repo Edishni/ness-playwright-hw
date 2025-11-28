@@ -7,7 +7,7 @@ export default defineConfig({
     timeout: 10 * 60 * 1000
     ,
     expect: { timeout: 5000 },
-    reporter: [['list'], ['allure-playwright']],
+    reporter: process.env.CI ? [['github'], ['html']] : [['list'], ['html']],
     outputDir: 'test-results',
     fullyParallel: true,
     use: {
@@ -17,12 +17,11 @@ export default defineConfig({
         screenshot: 'only-on-failure',
         video: 'retain-on-failure'
     },
-    workers: process.env.CI ? '100%' : 3,
+    workers: process.env.CI ? 1 : 3,
     projects: [
-        { name: 'chromium-125', use: { ...devices['Desktop Chromium 125'] } },
-        { name: 'chrome-142', use: { ...devices['Desktop Chrome 142'] } },
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
         { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-        { name: 'edge', use: { ...devices['Desktop Edge'] } },
+        { name: 'webkit', use: { ...devices['Desktop Safari'] } },
 
     ]
 });
