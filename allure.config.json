@@ -1,0 +1,28 @@
+{
+  "resultsDirectory": "allure-results",
+  "reportDirectory": "allure-report",
+  "plugins": [
+    "behaviors",
+    "packages", 
+    "screen-diff",
+    "timeline",
+    "trx"
+  ],
+  "categories": [
+    {
+      "name": "Product defects",
+      "matchedStatuses": ["failed"],
+      "messageRegex": ".*Product.*"
+    },
+    {
+      "name": "Cart issues", 
+      "matchedStatuses": ["failed"],
+      "messageRegex": ".*cart.*"
+    },
+    {
+      "name": "Search problems",
+      "matchedStatuses": ["failed"],
+      "messageRegex": ".*search.*"
+    }
+  ]
+}

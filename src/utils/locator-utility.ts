@@ -36,7 +36,7 @@ export async function getElement(page: Page, locators: LocatorDef[], options?: {
     testName = `${options.testInfo.project.name}-${titleSlug}`;
   }
   
-  const failurePath = `test-results/locator-failure-${testName}-${Date.now()}.png`;
-  try { await page.screenshot({ path: failurePath }); } catch (e) {}
+  const failurePath = `test-results/screenshots/locator-failure-${testName}-${Date.now()}.png`;
+  try { await page.screenshot({ path: failurePath, fullPage: true }); } catch (e) {}
   throw new Error(`All locators failed: ${locators.map(l=>l.value).join(', ')}; screenshot: ${failurePath}`);
 }

@@ -194,16 +194,28 @@
       { "type": "xpath", "value": "//main[@role='main']" }
     ],
     "cartItem": [
-      { "type": "css", "value": "[data-test-id='cart-item']" },
-      { "type": "xpath", "value": "//div[contains(@class, 'item-card')]" }
+      { "type": "css", "value": "[data-test-id='cart-bucket']" },
+      { "type": "xpath", "value": "//div[@data-test-id='cart-bucket']" }
     ],
     "cartItemTitle": [
-      { "type": "css", "value": ".item-title a" },
-      { "type": "xpath", "value": "//div[contains(@class, 'item-title')]//a" }
+      { "type": "css", "value": "h3.item-title a" },
+      { "type": "css", "value": "[data-test-id='cart-item-link']" },
+      { "type": "css", "value": "h3.item-title" },
+      { "type": "xpath", "value": "//h3[contains(@class, 'item-title')]//a" },
+      { "type": "xpath", "value": "//a[@data-test-id='cart-item-link']" }
     ],
     "cartItemPrice": [
+      { "type": "css", "value": "[data-test-id*='price']" },
       { "type": "css", "value": ".item-price" },
-      { "type": "xpath", "value": "//span[contains(@class, 'item-price')]" }
+      { "type": "css", "value": "[class*='price']" },
+      { "type": "css", "value": ".fee-displayOnlySpan" },
+      { "type": "xpath", "value": "//span[contains(@data-test-id, 'price')]" }
+    ],
+    "cartItemQuantity": [
+      { "type": "css", "value": "[data-test-id*='quantity']" },
+      { "type": "css", "value": "select[name*='quantity']" },
+      { "type": "css", "value": "input[name*='quantity']" },
+      { "type": "css", "value": ".quantity" }
     ],
     "cartSubtotal": [
       { "type": "css", "value": "[data-test-id='SUBTOTAL']" },

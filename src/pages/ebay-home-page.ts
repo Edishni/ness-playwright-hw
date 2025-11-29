@@ -18,19 +18,22 @@ export class EbayHomePage extends BasePage {
     super(page);
   }
 
-  async goto() {
-    await super.goto('https://www.ebay.com/');
+  async goto(url: string = 'https://www.ebay.com/') {
+    await super.goto(url);
   }
 
-  async searchForItem(query: string) {
-    console.log(`${await currentTime()} - [EbayHomePage] Search for: ${query}`);
+  async search(query: string) {
+    console.log(`${await currentTime()} - [search] Starting search for: "${query}"`);
     await this.type(this.searchInput, query);
+    console.log(`${await currentTime()} - [search] Search query entered, clicking search button...`);
     await this.click(this.searchButton);
+    console.log(`${await currentTime()} - [search] ✅ Search initiated`);
   }
 
   async clickCart() {
-    console.log(`${await currentTime()} - [EbayHomePage] Click Cart`);
+    console.log(`${await currentTime()} - [cart] Navigating to cart page...`);
     await this.click(this.cartLink);
+    console.log(`${await currentTime()} - [cart] ✅ Cart link clicked`);
   }
 
 }

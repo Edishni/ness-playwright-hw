@@ -29,24 +29,27 @@ export class EbayProductPage extends BasePage {
   }
 
   async getProductTitle(): Promise<string> {
-    console.log(`${await currentTime()} - [EbayProductPage] Get product title`);
+    console.log(`${await currentTime()} - [product] Get product title`);
     const locator = await this.getLocator(this.productTitle);
     return await locator.textContent() || '';
   }
 
   async addToCart() {
-    console.log(`${await currentTime()} - [EbayProductPage] Add to cart`);
+    console.log(`${await currentTime()} - [cart] Clicking add to cart button...`);
     await this.click(this.addToCartButton);
+    console.log(`${await currentTime()} - [cart] ✅ Add to cart button clicked`);
   }
 
   async buyNow() {
-    console.log(`${await currentTime()} - [EbayProductPage] Buy now`);
+    console.log(`${await currentTime()} - [product] Clicking buy now button...`);
     await this.click(this.buyNowButton);
+    console.log(`${await currentTime()} - [product] ✅ Buy now button clicked`);
   }
 
   async setQuantity(quantity: string) {
-    console.log(`${await currentTime()} - [EbayProductPage] Set quantity: ${quantity}`);
+    console.log(`${await currentTime()} - [product] Setting quantity to: ${quantity}`);
     await this.type(this.quantityInput, quantity);
+    console.log(`${await currentTime()} - [product] ✅ Quantity set`);
   }
 
   async addToWatchlist() {
@@ -98,15 +101,28 @@ export class EbayProductPage extends BasePage {
   }
 
   async addToCartV2(): Promise<void> {
-    console.log(`${await currentTime()} - [EbayProductPage] Add to cart (v2)`);
+    console.log(`${await currentTime()} - [product] Add to cart (v2) - starting...`);
     await this.selectRandomVariantIfAny();
     const locs: LocatorDef[] = [
       { type: 'css', value: '#atcRedesignId_btn' },
       { type: 'text', value: 'Add to cart' }
     ];
+    
+    console.log(`${await currentTime()} - [cart] Looking for add to cart button...`);
     const el = await getElement(this.page, locs, { timeout: 8000 });
     await el.click();
-    await this.page.waitForLoadState('networkidle', { timeout: 5000 });
+    console.log(`${await currentTime()} - [cart] Add to cart button clicked`);
+    
+    // Use domcontentloaded instead of networkidle (Playwright best practice)
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    
+    // Wait for add-to-cart feedback (dialog, message, etc.)
+    try {
+      await this.page.waitForSelector('[data-testid="cart-dialog"], .cart-notification, .success-msg', { timeout: 3000 });
+      console.log(`${await currentTime()} - [cart] ✅ Add to cart feedback detected`);
+    } catch (error) {
+      console.log(`${await currentTime()} - [cart] ⚠️ No add to cart feedback found but operation completed`);
+    }
   }
 
   async getProductPriceAsNumber(): Promise<number | null> {

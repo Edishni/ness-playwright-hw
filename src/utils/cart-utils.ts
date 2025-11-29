@@ -19,6 +19,7 @@ export async function assertCartTotalNotExceeds(
     testInfo?: any
 ): Promise<boolean> {
     try {
+        console.log(`${await currentTime()} - [cart] Navigating to cart to verify total...`);
         // Navigate to cart using centralized cart button locators
         const cartLocs: LocatorDef[] = FallbackLocators.cartButtons();
 
@@ -27,17 +28,34 @@ export async function assertCartTotalNotExceeds(
         }).catch(() => null);
 
         if (cartBtn) {
+            console.log(`${await currentTime()} - [cart] Clicking cart button...`);
             await cartBtn.click();
-          await page.waitForLoadState('networkidle', { timeout: 10000 });
+            
+            // Use domcontentloaded instead of networkidle (Playwright best practice)
+            await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+            
+            // Wait for cart content to be ready
+            try {
+                await page.waitForSelector('[data-testid="cart-bucket"], .cart-bucket, #mainContent', { timeout: 8000 });
+                console.log(`${await currentTime()} - [cart] ✅ Cart page loaded and content ready`);
+            } catch (error) {
+                console.log(`${await currentTime()} - [cart] ⚠️ Cart content check timed out but page loaded - continuing...`);
+            }
+            
+            console.log(`${await currentTime()} - [cart] ✅ Cart page loaded`);
+        } else {
+            console.log(`${await currentTime()} - [cart] ⚠️ Cart button not found, already on cart page?`);
         }
 
         // Extract cart total using centralized cart total locators from configuration
+        console.log(`${await currentTime()} - [cart] Extracting cart total amount...`);
         const cartTotalLocs: LocatorDef[] = FallbackLocators.cartTotalElements();
 
         let cartTotal = 0;
 
         // Try each locator strategy until one succeeds
         for (const locDef of cartTotalLocs) {
+            console.log(`${await currentTime()} - [locator] Trying cart total locator: ${locDef.type}=${locDef.value}`);
             const totalElement = await getElement(page, [locDef], {
                 timeout: 3000
             }).catch(() => null);

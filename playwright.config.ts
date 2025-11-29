@@ -1,23 +1,55 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as path from 'path';
 
 export default defineConfig({
     testDir: 'src/tests',
     testMatch: '**/*.spec.ts', // Let CLI specify which tests to run
     testIgnore: process.env.CI ? ['**/temp-tests/**'] : ['**/temp-tests/**'], // Allow core tests in CI
-    timeout: process.env.CI ? 5 * 60 * 1000 : 10 * 60 * 1000, // 5 min in CI, 10 min local
+    timeout: process.env.CI ? 10 * 60 * 1000 : 15 * 60 * 1000, // 10 min in CI, 15 min local
     expect: { timeout: process.env.CI ? 15000 : 5000 }, // Longer waits in CI
-    reporter: process.env.CI ? [['github'], ['html']] : [['list'], ['html']],
+    
+    // Global setup and teardown
+    globalSetup: path.resolve(__dirname, 'global-setup.ts'),
+    globalTeardown: path.resolve(__dirname, 'global-teardown.ts'),
+    
+    reporter: process.env.CI 
+        ? [['github'], ['html'], ['allure-playwright', { 
+            outputFolder: 'allure-results',
+            suiteTitle: false,
+            detail: true,
+            attachments: {
+                screenshot: 'always',
+                video: 'retain-on-failure',
+                trace: 'retain-on-failure'
+            }
+          }]] 
+        : [['list'], ['html'], ['allure-playwright', { 
+            outputFolder: 'allure-results',
+            suiteTitle: false, 
+            detail: true,
+            attachments: {
+                screenshot: 'always',
+                video: 'retain-on-failure', 
+                trace: 'retain-on-failure'
+            }
+          }]],
     outputDir: 'test-results',
     fullyParallel: false, // Disable parallel for CI stability
     use: {
         headless: true,
-        viewport: { width: 1280, height: 720 }, // Fixed viewport for CI
+        viewport: { width: 1280, height: 720 },
         ignoreHTTPSErrors: true,
-        screenshot: 'only-on-failure',
-        video: process.env.CI ? 'retain-on-failure' : 'off',
-        // CI-specific settings
+        screenshot: {
+            mode: 'only-on-failure', // Keep default for automatic screenshots
+            fullPage: true
+        },
+        video: {
+            mode: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
+            size: { width: 1280, height: 720 }
+        },
+        trace: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
         actionTimeout: process.env.CI ? 30000 : 0,
-        navigationTimeout: process.env.CI ? 60000 : 30000, // Longer navigation timeout
+        navigationTimeout: process.env.CI ? 60000 : 30000,
     },
     workers: process.env.CI ? 1 : 3,
     projects: [

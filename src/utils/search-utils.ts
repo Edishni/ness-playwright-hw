@@ -7,6 +7,7 @@ import { EbayHomePage } from '../pages/ebay-home-page';
 import { SearchResultsLocators } from './locators-loader';
 import { isPriceWithinBudget } from './ebay-price-extractor';
 import { currentTime } from './time-utility';
+import { withPageRetry } from './retry-helper';
 
 /**
  * Set price range filters on search results page
@@ -21,7 +22,7 @@ export async function setPriceRange(
     maxPrice?: number
 ): Promise<boolean> {
     try {
-        console.log(`${await currentTime()} - Setting price range: Min=${minPrice || 'none'}, Max=${maxPrice || 'none'}`);
+        console.log(`${await currentTime()} - [filter] Setting price range: Min=${minPrice || 'none'}, Max=${maxPrice || 'none'}`);
         
         // Get both min and max input fields directly (skip container search)
         const minPriceInputLocators = SearchResultsLocators.minPriceInput();
@@ -35,13 +36,13 @@ export async function setPriceRange(
             return false;
         }
         
-        console.log(`${await currentTime()} - Both price input fields found`);
+        console.log(`${await currentTime()} - [filter] Both price input fields found`);
         
         // Scroll inputs into view if needed
         try {
             await minInput.scrollIntoViewIfNeeded({ timeout: 3000 });
             await maxInput.scrollIntoViewIfNeeded({ timeout: 3000 });
-            console.log(`${await currentTime()} - Price inputs scrolled into view`);
+            console.log(`${await currentTime()} - [filter] Price inputs scrolled into view`);
         } catch (scrollError) {
             console.warn(`${await currentTime()} - Failed to scroll inputs into view: ${scrollError instanceof Error ? scrollError.message : 'Unknown error'}`);
         }
@@ -52,7 +53,7 @@ export async function setPriceRange(
             await minInput.fill(minPrice.toString());
             await page.waitForTimeout(100);
             await minInput.click({button: "left"}); // Click to focus and wake up the form
-            console.log(`${await currentTime()} - Set minimum price: ${minPrice}`);
+            console.log(`${await currentTime()} - [filter] Set minimum price: ${minPrice}`);
         }
         
         if (maxPrice !== undefined) {
@@ -60,7 +61,7 @@ export async function setPriceRange(
             await maxInput.fill(maxPrice.toString());
             await page.waitForTimeout(100);
             await minInput.click({button: "left"});
-            console.log(`${await currentTime()} - Set maximum price: ${maxPrice}`);
+            console.log(`${await currentTime()} - [filter] Set maximum price: ${maxPrice}`);
         }
         
         // Find and click apply button
@@ -75,13 +76,25 @@ export async function setPriceRange(
         // Scroll button into view and click
         await applyButton.scrollIntoViewIfNeeded();
         await applyButton.click();
-        console.log(`${await currentTime()} - Clicked apply button`);
+        console.log(`${await currentTime()} - [filter] Clicked apply button`);
         
-        // Wait for page to fully restart/reload with new filters
-        await page.waitForLoadState('networkidle', { timeout: 15000 });
-        await page.waitForTimeout(3000); // Extra wait for filter results to stabilize
+        // Use domcontentloaded instead of networkidle (Playwright best practice)
+        await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
         
-        console.log(`${await currentTime()} - Page restarted with price filter applied`);
+        // Wait for filter to be applied - look for results to refresh
+        try {
+            await page.waitForFunction(() => {
+                return document.querySelector('.srp-results, .s-results-list-atf') !== null;
+            }, { timeout: 10000 });
+            console.log(`${await currentTime()} - [nav] ✅ Price filter applied and results refreshed`);
+        } catch (error) {
+            console.log(`${await currentTime()} - [nav] ⚠️ Filter applied but results check timed out - continuing...`);
+        }
+        
+        // Additional wait for filter stabilization
+        await page.waitForTimeout(2000);
+        
+        console.log(`${await currentTime()} - [nav] ✅ Price filter process completed`);
         return true;
         
     } catch (error) {
@@ -96,21 +109,34 @@ export async function searchItemsByNameUnderPrice(
     maxPrice: number,
     limit = 5
 ): Promise<string[]> {
+    console.log(`${await currentTime()} - [search] Starting search: "${query}" under $${maxPrice} (limit: ${limit})`);
     // Simple flow: use site search, apply price filter, collect links
     const inputLocs: LocatorDef[] = new EbayHomePage(page).searchInput;
     const buttonLocs: LocatorDef[] = new EbayHomePage(page).searchButton;
 
+    console.log(`${await currentTime()} - [search] Filling search input and clicking search button...`);
     // Fill search input and click search button
     await getElement(page, inputLocs, { timeout: 5000 }).then(l => l.fill(query));
     await getElement(page, buttonLocs, { timeout: 5000 }).then(l => l.click());
-    await page.waitForLoadState('networkidle');
+    
+    // Use domcontentloaded instead of networkidle (Playwright best practice)
+    // networkidle is unreliable for dynamic sites like eBay with ongoing ads/tracking
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Add explicit wait for search results to appear (more reliable than networkidle)
+    try {
+        await page.waitForSelector('.srp-results, .s-results-list-atf', { timeout: 10000 });
+        console.log(`${await currentTime()} - [search] ✅ Search completed, results container found`);
+    } catch (error) {
+        console.log(`${await currentTime()} - [search] ⚠️ Results container not found, but page loaded - continuing...`);
+    }
     
     // Apply price range filter with maxPrice
-    console.log(`${await currentTime()} - Applying price filter: Max $${maxPrice}`);
+    console.log(`${await currentTime()} - [filter] Applying price filter: Max $${maxPrice}`);
     const priceFilterApplied = await setPriceRange(page, undefined, maxPrice);
     
     if (priceFilterApplied) {
-        console.log(`${await currentTime()} - Price filter applied successfully`);
+        console.log(`${await currentTime()} - [filter] Price filter applied successfully`);
     } else {
         console.warn(`${await currentTime()} - Price filter failed, continuing with manual filtering`);
     }
@@ -126,7 +152,7 @@ export async function searchItemsByNameUnderPrice(
     const searchResultsSelector = `${resultsContainerSelector} ${resultItemSelector}`;
 
     while (links.length < limit && currentPage <= maxPages) {
-        console.log(`${await currentTime()} - Processing page ${currentPage}...`);
+        console.log(`${await currentTime()} - [search] Processing page ${currentPage}...`);
 
         await page.locator(searchResultsSelector).first()
             .waitFor({ state: 'visible', timeout: 10000 })
@@ -136,7 +162,7 @@ export async function searchItemsByNameUnderPrice(
 
         // Get all items as array of locators using locator API (not page.$$)
         const items = await page.locator(searchResultsSelector).all();
-        console.log(`${await currentTime()} - Found ${items.length} items on page ${currentPage}`);
+        console.log(`${await currentTime()} - [search] Found ${items.length} items on page ${currentPage}`);
 
         // Get selector strings for item link and price
         const itemLinkSelector = SearchResultsLocators.itemLink()[0].value;
@@ -155,7 +181,7 @@ export async function searchItemsByNameUnderPrice(
                     .catch(() => null);
 
                 if (titleText) {
-                    console.log(`${await currentTime()} - Item title: ${titleText.trim().slice(0,40)}...`);
+                    console.log(`${await currentTime()} - [search] Item title: ${titleText.trim().slice(0,40)}...`);
                 }
 
                 const linkLocator = itemLocator.locator(itemLinkSelector).first();
@@ -164,14 +190,14 @@ export async function searchItemsByNameUnderPrice(
                 await linkLocator.waitFor();
 
                 // Get href using locator.getAttribute instead of $eval - use centralized locators
-                console.log(`${await currentTime()} - Extracting item link and price: ${itemLinkSelector}`);
+                console.log(`${await currentTime()} - [search] Extracting item link and price: ${itemLinkSelector}`);
                 let href = await linkLocator
                     .getAttribute('href', { timeout: 3000 })
                     .catch(() => null);
 
                 if (!href) {
                     href = await linkLocator.evaluate((el: HTMLAnchorElement) => el.href);
-                    console.log(`${await currentTime()} - Fallback href extraction: \n${href.slice(0, 100)}..`);
+                    console.log(`${await currentTime()} - [search] Fallback href extraction: \n${href.slice(0, 100)}..`);
                 }
 
                 if (!href) continue;
@@ -194,34 +220,36 @@ export async function searchItemsByNameUnderPrice(
                         finalPriceText = texts.filter(Boolean).join(" ");
                     }
 
-                    console.log(`${await currentTime()} - Extracted price text: ${finalPriceText}`);
+                    console.log(`${await currentTime()} - [search] Extracted price text: ${finalPriceText}`);
                 } catch (err) {
                     console.error(`${await currentTime()} - Failed to extract price text`, err);
                 }
 
                 // Case 3: no price found
                 if (!finalPriceText) {
-                    console.log(`${await currentTime()} - Price not found...`);
+                    console.log(`${await currentTime()} - [search] Price not found...`);
                 }
 
                 // Filter by price using specialized extraction utility
                 if (finalPriceText) {
                     const isWithinBudget = isPriceWithinBudget(finalPriceText, maxPrice);
+                    console.log(`${await currentTime()} - [price] Item price: ${finalPriceText} - ${isWithinBudget ? '✅ Within budget' : '❌ Over budget'}`);
                     if (!isWithinBudget) {
                         continue; // Skip items over budget
                     }
                 }
 
+                console.log(`${await currentTime()} - [search] ✅ Item added to collection (${links.length + 1}/${limit})`);
                 links.push(href);
             } catch (error) {
-                console.warn(`${await currentTime()} - Could not extract item data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.warn(`${await currentTime()} - [search] ⚠️ Could not extract item data: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 continue; // Skip this item, try next
             }
         }
 
         // Check if we have enough items or need to go to next page
         if (links.length >= limit) {
-            console.log(`${await currentTime()} - Collected ${links.length} items, target reached`);
+            console.log(`${await currentTime()} - [search] Collected ${links.length} items, target reached`);
             break;
         }
 
@@ -230,12 +258,12 @@ export async function searchItemsByNameUnderPrice(
         const nextButton = await getElement(page, nextButtonLocators, { timeout: 3000 }).catch(() => null);
 
         if (!nextButton) {
-            console.log(`${await currentTime()} - No next page button found, stopping at ${links.length} items`);
+            console.log(`${await currentTime()} - [nav] No next page button found, stopping at ${links.length} items`);
             break;
         }
 
         try {
-            console.log(`${await currentTime()} - Clicking next page button...`);
+            console.log(`${await currentTime()} - [nav] Clicking next page button...`);
             
             // Wait for navigation to start (URL change or network activity)
             await Promise.all([
@@ -253,14 +281,14 @@ export async function searchItemsByNameUnderPrice(
                 .catch(() => {});
             
             await page.waitForTimeout(1000); // Stabilization delay
-            console.log(`${await currentTime()} - Successfully navigated to page ${currentPage}`);
+            console.log(`${await currentTime()} - [nav] Successfully navigated to page ${currentPage}`);
         } catch (error) {
             console.warn(`${await currentTime()} - Failed to navigate to next page: ${error instanceof Error ? error.message : 'Unknown error'}`);
             break;
         }
     }
 
-    console.log(`${await currentTime()} - Total items collected: ${links.length} across ${currentPage} page(s)`);
+    console.log(`${await currentTime()} - [search] Total items collected: ${links.length} across ${currentPage} page(s)`);
     return links;
 }
 

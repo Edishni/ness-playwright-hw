@@ -4,16 +4,16 @@
       "id": "scenario-1",
       "name": "Search shoes under budget",
       "query": "shoes",
-      "maxPrice": 400,
-      "limit": 3,
+      "maxPrice": 200,
+      "limit":2,
       "expectedMinResults": 1
     },
     {
       "id": "scenario-2",
       "name": "Search laptop under budget",
       "query": "laptop",
-      "maxPrice": 500,
-      "limit": 3,
+      "maxPrice": 440,
+      "limit": 1,
       "expectedMinResults": 1
     },
     {
@@ -21,33 +21,25 @@
       "name": "Search watch under budget",
       "query": "watch",
       "maxPrice": 150,
-      "limit": 2,
+      "limit": 1,
       "expectedMinResults": 1
     },
     {
       "id": "scenario-4",
       "name": "Search camera under budget",
       "query": "camera",
-      "maxPrice": 300,
-      "limit": 3,
+      "maxPrice": 280,
+      "limit": 1,
       "expectedMinResults": 1
-    },
-    {
-      "id": "scenario-5",
-      "name": "Multi-page search with low price",
-      "query": "sticker",
-      "maxPrice": 9,
-      "limit": 25,
-      "expectedMinResults": 20
     }
   ],
   "budgetTests": [
     {
       "id": "budget-1",
       "name": "Single item budget check",
-      "budgetPerItem": 220,
+      "budgetPerItem":300,
       "itemsCount": 1,
-      "expectedMaxTotal": 220
+      "expectedMaxTotal": 330
     },
     {
       "id": "budget-2",

@@ -2,11 +2,62 @@ import { Locator } from '@playwright/test';
 import { BasePage } from './base-page';
 import { LocatorDef, getElement } from '../utils/locator-utility';
 import { CartLocators } from '../utils/locators-loader';
+import { currentTime } from '../utils/time-utility';
+import { allure } from 'allure-playwright';
+
+export interface CartItem {
+  title: string;
+  price: string;
+  quantity: number;
+}
 
 export class CartPage extends BasePage {
   constructor(page: any) { super(page); }
 
-  async gotoCart() { await this.goto('https://cart.ebay.com/'); await this.page.waitForLoadState('networkidle', { timeout: 10000 });; }
+  async gotoCart() { 
+    console.log(`${await currentTime()} - [cart] Navigating to cart page`);
+    await this.goto('https://cart.ebay.com/'); 
+    
+    // Use domcontentloaded instead of networkidle (Playwright best practice)
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+    
+    // Wait for cart content to be ready
+    try {
+      await this.page.waitForSelector('[data-testid="cart-bucket"], .cart-bucket, #mainContent', { timeout: 8000 });
+      console.log(`${await currentTime()} - [cart] ✅ Cart page loaded and content ready`);
+    } catch (error) {
+      console.log(`${await currentTime()} - [cart] ⚠️ Cart content check timed out but page loaded - continuing...`);
+    }
+    
+    // Take cart screenshot for requirement
+    await this.takeCartScreenshot();
+  }
+
+  /**
+   * Take cart page screenshot as required
+   */
+  async takeCartScreenshot(): Promise<void> {
+    try {
+      const timestamp = await currentTime();
+      const screenshotName = `cart-page-${timestamp.replace(/[:.\s]/g, '-')}.png`;
+      
+      console.log(`${timestamp} - [cart] 📸 Taking cart page screenshot...`);
+      
+      const screenshot = await this.page.screenshot({
+        fullPage: true,
+        path: `test-results/screenshots/${screenshotName}`
+      });
+      
+      // Attach to Allure if available
+      if (typeof allure !== 'undefined') {
+        await allure.attachment('Cart Page Screenshot', screenshot, 'image/png');
+      }
+      
+      console.log(`${timestamp} - [cart] ✅ Cart screenshot saved: ${screenshotName}`);
+    } catch (error) {
+      console.log(`${await currentTime()} - [cart] ⚠️ Failed to take cart screenshot: ${error}`);
+    }
+  }
 
   async getTotal(): Promise<number | null> {
     const locs: LocatorDef[] = CartLocators.cartSubtotal();
@@ -14,5 +65,112 @@ export class CartPage extends BasePage {
     const txt = (await el.textContent()) || '';
     const num = Number(txt.replace(/[^0-9\.]/g, ''));
     return Number.isNaN(num) ? null : num;
+  }
+
+  async getCartItems(): Promise<CartItem[]> {
+    console.log(`${await currentTime()} - [cart] Extracting cart items...`);
+    
+    try {
+      // Get cart item locators from centralized source
+      const cartItemLocators = CartLocators.cartItem();
+      const cartItemTitleLocators = CartLocators.cartItemTitle();
+      const cartItemPriceLocators = CartLocators.cartItemPrice();
+      const cartItemQuantityLocators = CartLocators.cartItemQuantity();
+      
+      // Try to find cart items using smart locator strategy
+      let items: CartItem[] = [];
+      
+      for (const locatorDef of cartItemLocators) {
+        try {
+          console.log(`${await currentTime()} - [locator] trying ${locatorDef.type}=${locatorDef.value}`);
+          
+          const elements = await this.page.$$(locatorDef.value);
+          if (elements.length > 0) {
+            console.log(`${await currentTime()} - [locator] success: found ${elements.length} cart items`);
+            
+            for (let i = 0; i < elements.length; i++) {
+              const element = elements[i];
+              
+              // Extract title using centralized locators
+              let title = 'Unknown Title';
+              for (const titleLocator of cartItemTitleLocators) {
+                try {
+                  const titleElement = await element.$(titleLocator.value);
+                  if (titleElement) {
+                    const titleText = await titleElement.textContent();
+                    if (titleText?.trim()) {
+                      title = titleText.trim();
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  // Continue to next locator
+                }
+              }
+              
+              // Extract price using centralized locators
+              let price = '0';
+              for (const priceLocator of cartItemPriceLocators) {
+                try {
+                  const priceElement = await element.$(priceLocator.value);
+                  if (priceElement) {
+                    const priceText = await priceElement.textContent();
+                    if (priceText?.trim()) {
+                      price = priceText.replace(/[^0-9\.]/g, '') || '0';
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  // Continue to next locator
+                }
+              }
+              
+              // Extract quantity using centralized locators
+              let quantity = 1;
+              for (const quantityLocator of cartItemQuantityLocators) {
+                try {
+                  const quantityElement = await element.$(quantityLocator.value);
+                  if (quantityElement) {
+                    const quantityText = await quantityElement.textContent() || await quantityElement.inputValue();
+                    if (quantityText?.trim()) {
+                      quantity = parseInt(quantityText) || 1;
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  // Continue to next locator
+                }
+              }
+              
+              if (title !== 'Unknown Title') {
+                items.push({ title, price, quantity });
+              }
+            }
+            
+            if (items.length > 0) break; // Found items, no need to try other locators
+          }
+        } catch (error) {
+          console.log(`${await currentTime()} - [locator] failed: ${locatorDef.type}=${locatorDef.value}`);
+          // Continue to next locator
+        }
+      }
+      
+      console.log(`${await currentTime()} - [cart] Successfully extracted ${items.length} cart items`);
+      
+      // Attach cart items to Allure if available
+      if (typeof allure !== 'undefined' && items.length > 0) {
+        await allure.attachment(
+          'Cart Items Data',
+          JSON.stringify(items, null, 2),
+          'application/json'
+        );
+      }
+      
+      return items;
+      
+    } catch (error) {
+      console.log(`${await currentTime()} - [cart] Error extracting cart items: ${error}`);
+      return [];
+    }
   }
 }

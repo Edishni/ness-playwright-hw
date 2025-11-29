@@ -111,6 +111,7 @@ export const CartLocators = {
   cartItem: () => locatorsLoader.getLocators('cart', 'cartItem'),
   cartItemTitle: () => locatorsLoader.getLocators('cart', 'cartItemTitle'),
   cartItemPrice: () => locatorsLoader.getLocators('cart', 'cartItemPrice'),
+  cartItemQuantity: () => locatorsLoader.getLocators('cart', 'cartItemQuantity'),
   cartSubtotal: () => locatorsLoader.getLocators('cart', 'cartSubtotal'),
   cartTotal: () => locatorsLoader.getLocators('cart', 'cartTotal'),
   proceedToCheckoutButton: () => locatorsLoader.getLocators('cart', 'proceedToCheckoutButton'),

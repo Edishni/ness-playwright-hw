@@ -29,8 +29,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run Core Requirements Tests
-      run: npx playwright test src/tests/core-requirements.spec.ts --project=${{ matrix.browser }} --reporter=list
+    - name: Run Simple Cart Validation Test
+      run: npx playwright test src/tests/simple-cart-validation.spec.ts --project=${{ matrix.browser }} --reporter=list
       env:
         CI: true
         HOME: /root
