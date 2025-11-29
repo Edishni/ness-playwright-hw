@@ -15,6 +15,31 @@ import { assertCartTotalNotExceeds } from '../utils/cart-utils';
 const testData = loadTestDataForSuite('core-requirements');
 
 test.describe('Core Requirements - Search & Cart Workflow', () => {
+    
+    // Setup teardown to close all pages and context after each test
+    test.afterEach(async ({ page }, testInfo) => {
+        try {
+            console.log(`${await currentTime()} - [teardown] Starting cleanup for test: ${testInfo.title}`);
+            
+            // Close all pages in the context
+            const context = page.context();
+            const pages = context.pages();
+            
+            console.log(`${await currentTime()} - [teardown] Closing ${pages.length} page(s)...`);
+            
+            for (const p of pages) {
+                if (!p.isClosed()) {
+                    await p.close();
+                }
+            }
+            
+            console.log(`${await currentTime()} - [teardown] ✅ All pages closed successfully`);
+            
+        } catch (error) {
+            console.warn(`${await currentTime()} - [teardown] ⚠️ Error during cleanup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    });
+    
     // ==================== CR1: Search Items (Unit Tests) ====================
     testData?.searchScenarios?.forEach((scenario: any, index: number) => {
         test(`CR1.${index + 1}: Search <${scenario.query}> under price limit : $${scenario.maxPrice}`, async ({ page }, testInfo) => {
@@ -49,7 +74,7 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
     test('CR2.1: Add single item to cart with variant selection', async ({ page }, testInfo) => {
         // Arrange
         const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-        const scenario = testData.searchScenarios[4];
+        const scenario = testData.searchScenarios[0];
             console.log(`${await currentTime()} - [CR2.1] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add item to cart`);
 
         const homePage = new EbayHomePage(page);
@@ -77,7 +102,7 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
     test('CR2.2: Add multiple items to cart', async ({ page }, testInfo) => {
         // Arrange
         const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-        const scenario = testData.searchScenarios[4];
+        const scenario = testData.searchScenarios[0];
         const cartTest = testData.cartTests[2]; 
         console.log(`${await currentTime()} - [CR2.2] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add ${cartTest.itemsToAdd} items to cart`);
 

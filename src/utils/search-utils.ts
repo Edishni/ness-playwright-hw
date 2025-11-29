@@ -47,24 +47,47 @@ export async function setPriceRange(
             console.warn(`${await currentTime()} - Failed to scroll inputs into view: ${scrollError instanceof Error ? scrollError.message : 'Unknown error'}`);
         }
         
-        // Clear existing values and set new ones
-        if (minPrice !== undefined) {
-            await minInput.clear();
-            await minInput.fill(minPrice.toString());
-            await page.waitForTimeout(100);
-            await minInput.click({button: "left"}); // Click to focus and wake up the form
-            console.log(`${await currentTime()} - [filter] Set minimum price: ${minPrice}`);
-        }
-        
+        // Step 1: Set MAX price first if maxPrice is provided (most scenarios have maxPrice)
         if (maxPrice !== undefined) {
+            console.log(`${await currentTime()} - [filter] Step 1: Setting maximum price: ${maxPrice}`);
             await maxInput.clear();
             await maxInput.fill(maxPrice.toString());
-            await page.waitForTimeout(100);
-            await minInput.click({button: "left"});
-            console.log(`${await currentTime()} - [filter] Set maximum price: ${maxPrice}`);
+            await page.waitForTimeout(300); // Wait for field to update
+            
+            // Verify the value actually stuck and trigger form validation
+            const actualMaxValue = await maxInput.inputValue();
+            console.log(`${await currentTime()} - [filter] Max field value verification: "${actualMaxValue}"`);
+            
+            if (actualMaxValue !== maxPrice.toString()) {
+                console.log(`${await currentTime()} - [filter] ⚠️ Max price value mismatch, retrying...`);
+                await maxInput.focus();
+                await maxInput.clear();
+                await maxInput.fill(maxPrice.toString());
+                await page.waitForTimeout(200);
+            }
+            
+            // Trigger form validation by pressing Tab or Enter to "commit" the value
+            await maxInput.press('Tab');
+            await page.waitForTimeout(200);
+            console.log(`${await currentTime()} - [filter] ✅ Max price set: ${maxPrice}`);
         }
         
-        // Find and click apply button
+        // Step 2: Set MIN price (even if not provided in test config, jump to min field as before)
+        if (minPrice !== undefined) {
+            console.log(`${await currentTime()} - [filter] Step 2: Setting minimum price: ${minPrice}`);
+            await minInput.clear();
+            await minInput.fill(minPrice.toString());
+            await page.waitForTimeout(200);
+            await minInput.press('Tab'); // Trigger validation
+            console.log(`${await currentTime()} - [filter] ✅ Min price set: ${minPrice}`);
+        } else {
+            console.log(`${await currentTime()} - [filter] Step 2: No min price in test config, clicking min field to activate form`);
+            await minInput.click({button: "left"}); // Click min field to activate the form as before
+            await page.waitForTimeout(200);
+        }
+        
+        // Step 2.5: Verify submit button is enabled before clicking
+        console.log(`${await currentTime()} - [filter] Checking if submit button is enabled...`);
         const applyButtonLocators = SearchResultsLocators.priceRangeApplyButton();
         const applyButton = await getElement(page, applyButtonLocators, { timeout: 3000 }).catch(() => null);
         
@@ -72,7 +95,29 @@ export async function setPriceRange(
             console.warn(`${await currentTime()} - Apply button not found`);
             return false;
         }
-
+        
+        // Check if button is enabled
+        const isDisabled = await applyButton.getAttribute('disabled');
+        if (isDisabled !== null) {
+            console.warn(`${await currentTime()} - ❌ Submit button is DISABLED. Max: "${await maxInput.inputValue()}", Min: "${await minInput.inputValue()}"`);
+            // Try one more time to activate the form by clicking both fields
+            await maxInput.click();
+            await page.waitForTimeout(100);
+            await minInput.click();
+            await page.waitForTimeout(300);
+            
+            const stillDisabled = await applyButton.getAttribute('disabled');
+            if (stillDisabled !== null) {
+                console.error(`${await currentTime()} - ❌ Submit button still disabled after retry`);
+                return false;
+            }
+        }
+        
+        console.log(`${await currentTime()} - [filter] ✅ Submit button is enabled`);
+        
+        // Step 3: Apply the price range
+        console.log(`${await currentTime()} - [filter] Step 3: Applying price range filter`);
+        
         // Scroll button into view and click
         await applyButton.scrollIntoViewIfNeeded();
         await applyButton.click();
@@ -310,7 +355,21 @@ export function loadTestDataForSuite(suiteName: string): any {
         throw new Error(`Test data file not found: ${filePath}`);
     }
 
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const testData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    
+    // Validate array lengths to prevent runtime errors
+    console.log(`${suiteName} test data loaded:`);
+    if (testData.searchScenarios) {
+        console.log(`  - searchScenarios: ${testData.searchScenarios.length} items (indexes 0-${testData.searchScenarios.length - 1})`);
+    }
+    if (testData.cartTests) {
+        console.log(`  - cartTests: ${testData.cartTests.length} items (indexes 0-${testData.cartTests.length - 1})`);
+    }
+    if (testData.budgetTests) {
+        console.log(`  - budgetTests: ${testData.budgetTests.length} items (indexes 0-${testData.budgetTests.length - 1})`);
+    }
+    
+    return testData;
 }
 
 /**
@@ -324,5 +383,29 @@ export function getTestCase(testData: any, testCaseId: string): any {
         return undefined;
     }
     return testData.testCases.find((tc: any) => tc.id === testCaseId);
+}
+
+/**
+ * Safely access array elements with bounds checking and helpful error messages
+ * @param array - The array to access
+ * @param index - The index to access
+ * @param arrayName - The name of the array for error messages
+ * @returns The element at the given index
+ * @throws Error if index is out of bounds
+ */
+export function safeArrayAccess(array: any[], index: number, arrayName: string): any {
+    if (!Array.isArray(array)) {
+        throw new Error(`${arrayName} is not a valid array`);
+    }
+    
+    if (index < 0) {
+        throw new Error(`${arrayName} index ${index} is negative. Valid indexes: 0-${array.length - 1}`);
+    }
+    
+    if (index >= array.length) {
+        throw new Error(`${arrayName} index ${index} is out of bounds. Array has ${array.length} items (valid indexes: 0-${array.length - 1})`);
+    }
+    
+    return array[index];
 }
 
