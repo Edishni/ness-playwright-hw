@@ -130,6 +130,11 @@
       { "type": "role", "value": "link", "name": "Add to cart" },
       { "type": "xpath", "value": "//a[contains(text(), 'Add to cart')]" }
     ],
+    "seeInCartButton": [
+      { "type": "role", "value": "link", "name": "See in cart" },
+      { "type": "xpath", "value": "//a[contains(text(), 'See in cart')]" },
+      { "type": "css", "value": "[data-testid='x-atc-cta-btn']" }
+    ],
     "buyNowButton": [
       { "type": "role", "value": "link", "name": "Buy It Now" },
       { "type": "xpath", "value": "//a[contains(text(), 'Buy It Now')]" }

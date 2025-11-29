@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test';
 import { LocatorDef } from './locator-utility';
 import { getElement } from './locator-utility';
-import { VariantLocators, FallbackLocators, CartLocators } from './locators-loader';
+import { VariantLocators, FallbackLocators, CartLocators, ProductLocators } from './locators-loader';
 import { currentTime } from './time-utility';
 
 /**
@@ -315,44 +315,169 @@ async function selectOptionFromOpenDropdown(page: Page, openDropdownElement: any
  */
 async function validateItemAdded(page: Page): Promise<boolean> {
     console.log(`${await currentTime()} - [cart] Validating item was added to cart...`);
+    
+    const maxAttempts = 3;
+    let attempt = 1;
+    
+    while (attempt <= maxAttempts) {
+        console.log(`${await currentTime()} - [dialog] Attempt ${attempt}/${maxAttempts}: Looking for 'Added to cart' dialog...`);
+        
+        try {
+            // Wait for any dialog to appear
+            const dialogLocators = CartLocators.addedToCartDialog();
+            const dialog = await getElement(page, dialogLocators, { timeout: 7000 }).catch(() => null);
+
+            if (!dialog) {
+                console.warn(`${await currentTime()} - [dialog] ❌ No dialog appeared within timeout (attempt ${attempt})`);
+                if (attempt === maxAttempts) return false;
+                attempt++;
+                continue;
+            }
+
+            console.log(`${await currentTime()} - [dialog] ✅ Dialog detected (attempt ${attempt})`);
+
+            // Verify this is the correct "Added to cart" dialog by checking header
+            console.log(`${await currentTime()} - [dialog] Verifying dialog header text...`);
+            const headerLocators = CartLocators.addedToCartHeader();
+            
+            // Give more time for header to appear and be more tolerant
+            await page.waitForTimeout(1000); // Wait for dialog to fully load
+            const header = await getElement(page, headerLocators, { timeout: 5000 }).catch(() => null);
+
+            if (!header) {
+                console.warn(`${await currentTime()} - [dialog] ❌ Header not found - might be wrong dialog or timing issue`);
+                
+                // Check if this was actually a successful add to cart by checking button state
+                console.log(`${await currentTime()} - [dialog] Checking if item was actually added by examining button state...`);
+                const wasItemAdded = await checkIfItemWasAddedToCart(page);
+                
+                if (wasItemAdded) {
+                    console.log(`${await currentTime()} - [dialog] ✅ Item was actually added! Dialog header check failed due to timing, but button changed to 'See in cart'`);
+                    // Close the dialog and return success
+                    try {
+                        await closeAnyDialog(page);
+                        console.log(`${await currentTime()} - [dialog] ✅ Dialog closed after successful add to cart`);
+                    } catch (closeError) {
+                        console.warn(`${await currentTime()} - [dialog] Could not close dialog but item was added successfully`);
+                    }
+                    return true;
+                }
+                
+                console.log(`${await currentTime()} - [dialog] Closing wrong dialog and retrying...`);
+                // Close the wrong dialog
+                try {
+                    await closeAnyDialog(page);
+                    console.log(`${await currentTime()} - [dialog] ✅ Wrong dialog closed successfully`);
+                } catch (closeError) {
+                    console.warn(`${await currentTime()} - [dialog] ⚠️ Could not close wrong dialog: ${closeError instanceof Error ? closeError.message : 'Unknown error'}`);
+                }
+                
+                // Wait a bit before retrying
+                await page.waitForTimeout(1000);
+                attempt++;
+                continue;
+            }
+
+            // Correct dialog found - verify it's fully visible
+            await header.waitFor({ state: 'visible', timeout: 3000 });
+            console.log(`${await currentTime()} - [dialog] ✅ Confirmed: Correct 'Added to cart' dialog found!`);
+
+            // Close the correct dialog
+            console.log(`${await currentTime()} - [dialog] Closing 'Added to cart' dialog...`);
+            await closeDialog(page);
+            console.log(`${await currentTime()} - [dialog] ✅ Dialog closed successfully`);
+            
+            return true;
+
+        } catch (error) {
+            console.error(`${await currentTime()} - [dialog] Error during validation attempt ${attempt}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            if (attempt === maxAttempts) return false;
+            attempt++;
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Check if item was actually added to cart by examining button states
+ * After successful add to cart, the "Add to cart" button changes to "See in cart"
+ * @param page - Playwright page object
+ * @returns true if item was added (button changed), false otherwise
+ */
+async function checkIfItemWasAddedToCart(page: Page): Promise<boolean> {
+    console.log(`${await currentTime()} - [validation] Checking button state to confirm item was added...`);
+    
     try {
-        // Wait for "Added to cart" dialog to appear
-        console.log(`${await currentTime()} - [dialog] Looking for 'Added to cart' dialog...`);
-        const dialogLocators = CartLocators.addedToCartDialog();
-        const dialog = await getElement(page, dialogLocators, { timeout: 7000 }).catch(() => null);
-
-        if (!dialog) {
-            console.warn(`${await currentTime()} - [dialog] ❌ No "Added to cart" dialog appeared within timeout`);
+        // First check if "See in cart" button exists (indicates successful add)
+        const seeInCartLocators = ProductLocators.seeInCartButton();
+        const seeInCartButton = await getElement(page, seeInCartLocators, { timeout: 2000 }).catch(() => null);
+        
+        if (seeInCartButton) {
+            console.log(`${await currentTime()} - [validation] ✅ "See in cart" button found - item was successfully added!`);
+            return true;
+        }
+        
+        // If not, check if "Add to cart" button still exists (indicates add failed)
+        const addToCartLocators = ProductLocators.addToCartButton();
+        const addToCartButton = await getElement(page, addToCartLocators, { timeout: 2000 }).catch(() => null);
+        
+        if (addToCartButton) {
+            console.log(`${await currentTime()} - [validation] ❌ "Add to cart" button still present - item was not added`);
             return false;
         }
-
-        console.log(`${await currentTime()} - [dialog] ✅ "Added to cart" dialog detected`);
-
-        // Verify header text to confirm this is the correct dialog
-        console.log(`${await currentTime()} - [dialog] Verifying dialog header text...`);
-        const headerLocators = CartLocators.addedToCartHeader();
-        // Use a longer timeout for the header to appear within the dialog
-        const header = await getElement(page, headerLocators, { timeout: 5000 }).catch(() => null);
-
-        if (!header) {
-            console.warn(`${await currentTime()} - Dialog found but header verification failed - not the correct dialog`);
-            return false;
-        }
-
-        // Wait for header to be fully visible before proceeding
-        await header.waitFor({ state: 'visible', timeout: 3000 });
-        console.log(`${await currentTime()} - [dialog] Confirmed: Dialog shows "Added to cart" - item successfully added!`);
-
-        // CRITICAL FIX: Wait for dialog to close properly before returning
-        console.log(`${await currentTime()} - [dialog] Attempting to close dialog...`);
-        await closeDialog(page);
-        console.log(`${await currentTime()} - [dialog] Dialog closed successfully`);
-
-        return true;
-
-    } catch (error) {
-        console.error(`${await currentTime()} - Error validating item added: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        
+        // If neither button is found, something unexpected happened
+        console.warn(`${await currentTime()} - [validation] ⚠️ Neither 'Add to cart' nor 'See in cart' button found - unclear state`);
         return false;
+        
+    } catch (error) {
+        console.error(`${await currentTime()} - [validation] Error checking button state: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        return false;
+    }
+}
+
+/**
+ * Close any dialog that's currently open (for closing wrong/unexpected dialogs)
+ * @param page - Playwright page object
+ */
+async function closeAnyDialog(page: Page): Promise<void> {
+    console.log(`${await currentTime()} - [dialog] Attempting to close any open dialog...`);
+    
+    // Try common dialog close button patterns
+    const commonCloseSelectors = [
+        'button[aria-label*="Close"]',
+        'button[data-testid*="close"]', 
+        'button.close',
+        '.dialog-close',
+        '[role="dialog"] button[type="button"]',
+        '.lightbox-dialog__close',
+        'button[title*="Close"]'
+    ];
+    
+    for (const selector of commonCloseSelectors) {
+        try {
+            const closeButton = page.locator(selector).first();
+            await closeButton.waitFor({ timeout: 1000 });
+            
+            if (await closeButton.isVisible()) {
+                await closeButton.click();
+                console.log(`${await currentTime()} - [dialog] Closed dialog using selector: ${selector}`);
+                await page.waitForTimeout(500); // Wait for dialog to close
+                return;
+            }
+        } catch (error) {
+            // Continue to next selector if this one fails
+        }
+    }
+    
+    // If no specific close button found, try ESC key
+    try {
+        console.log(`${await currentTime()} - [dialog] No close button found, trying ESC key...`);
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(500);
+    } catch (error) {
+        console.warn(`${await currentTime()} - [dialog] Could not close dialog with ESC key`);
     }
 }
 

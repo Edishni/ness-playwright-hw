@@ -15,31 +15,31 @@ import { assertCartTotalNotExceeds } from '../utils/cart-utils';
 const testData = loadTestDataForSuite('core-requirements');
 
 test.describe('Core Requirements - Search & Cart Workflow', () => {
-    
+
     // Setup teardown to close all pages and context after each test
     test.afterEach(async ({ page }, testInfo) => {
         try {
             console.log(`${await currentTime()} - [teardown] Starting cleanup for test: ${testInfo.title}`);
-            
+
             // Close all pages in the context
             const context = page.context();
             const pages = context.pages();
-            
+
             console.log(`${await currentTime()} - [teardown] Closing ${pages.length} page(s)...`);
-            
+
             for (const p of pages) {
                 if (!p.isClosed()) {
                     await p.close();
                 }
             }
-            
+
             console.log(`${await currentTime()} - [teardown] ✅ All pages closed successfully`);
-            
+
         } catch (error) {
             console.warn(`${await currentTime()} - [teardown] ⚠️ Error during cleanup: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     });
-    
+
     // ==================== CR1: Search Items (Unit Tests) ====================
     testData?.searchScenarios?.forEach((scenario: any, index: number) => {
         test(`CR1.${index + 1}: Search <${scenario.query}> under price limit : $${scenario.maxPrice}`, async ({ page }, testInfo) => {
@@ -75,7 +75,7 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
         // Arrange
         const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
         const scenario = testData.searchScenarios[0];
-            console.log(`${await currentTime()} - [CR2.1] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add item to cart`);
+        console.log(`${await currentTime()} - [CR2.1] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add item to cart`);
 
         const homePage = new EbayHomePage(page);
 
@@ -103,7 +103,7 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
         // Arrange
         const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
         const scenario = testData.searchScenarios[0];
-        const cartTest = testData.cartTests[2]; 
+        const cartTest = testData.cartTests[1];
         console.log(`${await currentTime()} - [CR2.2] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add ${cartTest.itemsToAdd} items to cart`);
 
         const homePage = new EbayHomePage(page);
@@ -116,6 +116,9 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
 
         // Add items to cart
         await addItemsToCart(page, urls, testInfo);
+
+        const cartPage = new CartPage(page);
+        await cartPage.gotoCart();
 
         console.log(`${await currentTime()} - [CR2.2] ${urls.length} items added to cart`);
         testInfo.attach('cart-action', {
@@ -156,30 +159,30 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
     test('CR5.1: Complete Search and Cart Workflow - Multiple Search Terms with Cart Integration', async ({ page }, testInfo) => {
         // Setup test hooks
         await TestHooks.beforeEach(testInfo, page);
-        
+
         const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
         console.log(`${await currentTime()} - [CR5.1] Browser: ${browserName.toUpperCase()} - Starting Complete Search & Cart Integration Workflow`);
 
         const homePage = new EbayHomePage(page);
         const cartPage = new CartPage(page);
         let allUrls: string[] = [];
-        
+
         // Step 1: Loop through search scenarios (like CR1.1-1.5)
         await TestHooks.step('Phase 1: Search Items from Multiple Categories', async () => {
             console.log(`${await currentTime()} - [CR5.1] Phase 1: Search Items from Multiple Categories`);
-            
+
             for (const [index, scenario] of testData.searchScenarios.entries()) {
                 console.log("-------------------------");
                 console.log(`${await currentTime()} - [CR5.1.${index + 1}] Searching for: ${scenario.query} under $${scenario.maxPrice}`);
-                
+
                 await homePage.goto();
                 const urls = await searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, scenario.limit);
-                
+
                 expect(urls.length).toBeGreaterThanOrEqual(scenario.expectedMinResults);
-                
+
                 // Collect URLs for cart addition
                 allUrls.push(...urls);
-                
+
                 console.log(`${await currentTime()} - [CR5.1.${index + 1}] Found ${urls.length} items for "${scenario.query}"`);
                 urls.forEach((url, idx) => {
                     console.log(`    ${idx + 1}. ${url.slice(0, 60)}...`);
@@ -189,7 +192,7 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
 
         // Step 2: Generate consolidated links report
         console.log(`${await currentTime()} - [CR5.1] Phase 2: Generated ${allUrls.length} total product links`);
-        
+
         testInfo.attach('all-search-results', {
             body: JSON.stringify({
                 totalItems: allUrls.length,
@@ -201,50 +204,50 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
 
         // Step 3: Add items to cart (like CR2.1-2.3)
         console.log(`${await currentTime()} - [CR5.1] Phase 3: Adding Items to Cart`);
-        
+
         // Limit to reasonable number for cart testing
         const itemsToAdd = Math.min(allUrls.length, 5);
         const selectedUrls = allUrls.slice(0, itemsToAdd);
-        
+
         // Print item URLs for tracking (titles will be extracted during cart validation)
         console.log(`${await currentTime()} - [test] URLs to be processed for cart:`);
         for (let i = 0; i < selectedUrls.length; i++) {
             const url = selectedUrls[i];
             console.log(`${await currentTime()} - [test] ${i + 1}. ${url.slice(0, 80)}...`);
         }
-        
+
         console.log(`${await currentTime()} - [cart] Adding ${selectedUrls.length} items to cart`);
         await addItemsToCart(page, selectedUrls, testInfo);
 
         // Step 4: Verify cart and budget
         let cartItems: any[] = [];
         let cartTotal: number = 0;
-        
+
         await TestHooks.step('Phase 4: Cart Verification', async () => {
             console.log(`${await currentTime()} - [CR5.1] Phase 4: Cart Verification`);
-            
+
             await cartPage.gotoCart();
-            
+
             // Take cart screenshot for documentation
             await TestHooks.takeScreenshot(
-                page, 
-                testInfo, 
+                page,
+                testInfo,
                 'cart-workflow-verification',
                 'Cart state during integrated workflow verification'
             );
-            
+
             // Get cart items and titles for validation
             cartItems = await cartPage.getCartItems();
             const totalResult = await cartPage.getTotal();
             cartTotal = totalResult || 0; // Handle null case
             console.log(`${await currentTime()} - [cart] Cart total is $${cartTotal}`);
             console.log(`${await currentTime()} - [cart] Items found in cart:`);
-            
+
             for (let i = 0; i < cartItems.length; i++) {
                 const item = cartItems[i];
                 console.log(`${await currentTime()} - [cart] ${i + 1}. ${item.title.slice(0, 60)}... - $${item.price} (qty: ${item.quantity})`);
             }
-            
+
             // Validate item count
             console.log(`${await currentTime()} - [test] Cart validation: Expected ${selectedUrls.length} items, Found ${cartItems.length} items`);
             if (selectedUrls.length !== cartItems.length) {
@@ -298,17 +301,17 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
         const homePage = new EbayHomePage(page);
         const cartPage = new CartPage(page);
         let allUrls: string[] = [];
-        
+
         // Step 1: Collect maximum items from all search scenarios
         console.log(`${await currentTime()} - [CR5.2] Phase 1: Maximum Item Collection`);
-        
+
         for (const [index, scenario] of testData.searchScenarios.entries()) {
             console.log(`${await currentTime()} - [CR5.2.${index + 1}] Max search for: ${scenario.query}`);
-            
+
             await homePage.goto();
             // Use higher limit for stress test
             const urls = await searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, 10);
-            
+
             allUrls.push(...urls);
             console.log(`${await currentTime()} - [CR5.2.${index + 1}] Collected ${urls.length} items`);
         }
@@ -316,14 +319,14 @@ test.describe('Core Requirements - Search & Cart Workflow', () => {
         // Step 2: Add maximum reasonable items to cart
         const maxItems = Math.min(allUrls.length, 8); // Stress test with more items
         const selectedUrls = allUrls.slice(0, maxItems);
-        
+
         console.log(`${await currentTime()} - [CR5.2] Phase 2: Adding ${selectedUrls.length} items to cart (stress test)`);
         await addItemsToCart(page, selectedUrls, testInfo);
 
         // Step 3: Verify cart handles multiple items
         await cartPage.gotoCart();
         const cartTotal = await cartPage.getTotal();
-        
+
         // Assert stress test success
         expect(selectedUrls.length).toBeGreaterThanOrEqual(3);
         expect(cartTotal).toBeGreaterThan(0);
