@@ -23,6 +23,7 @@ export class ScreenshotManager {
     private readonly testInfo: TestInfo;
     private readonly screenshotDir: string;
 
+
     constructor(page: Page, testInfo: TestInfo) {
         this.page = page;
         this.testInfo = testInfo;
@@ -79,88 +80,88 @@ export class ScreenshotManager {
 
             if (attachToAllure) {
                 await allure.attachment(name, screenshotBuffer, `image/${type}`);
-                console.log(`${timestamp} - [screenshot] 📸 Attached to Allure: ${name}`);
+                console.log(`${await currentTime()} - [screenshot MNG] Attached to Allure: ${name}`);
             }
 
             if (saveToTestResults) {
                 const savedPath = path.join(this.screenshotDir, filename);
-                console.log(`${timestamp} - [screenshot] 💾 Saved: ${savedPath}`);
+                console.log(`${await currentTime()} - [screenshot MNG] Saved: ${savedPath}`);
                 return savedPath;
             }
 
             return 'screenshot-buffer-only';
         } catch (error) {
             const timestamp = await currentTime();
-            console.error(`${timestamp} - [screenshot] ❌ Failed: ${error}`);
+            console.error(`${await currentTime()} - [screenshot MNG] ❌ Failed: ${error}`);
             throw error;
         }
     }
 
-    /**
-     * Take a cart page screenshot (addresses requirement #2)
-     * Specialized method for cart page screenshots with proper naming
-     */
-    async takeCartScreenshot(): Promise<string> {
-        const timestamp = await currentTime();
-        console.log(`${timestamp} - [screenshot] 🛒 Taking cart page screenshot...`);
+    // /**
+    //  * Take a cart page screenshot (addresses requirement #2)
+    //  * Specialized method for cart page screenshots with proper naming
+    //  */
+    // async takeCartScreenshot(): Promise<string> {
+    //     const timestamp = await currentTime();
+    //     console.log(`${timestamp} - [screenshot] 🛒 Taking cart page screenshot...`);
         
-        return await this.takeScreenshot({
-            name: 'cart-page-validation',
-            fullPage: true,
-            attachToAllure: true,
-            saveToTestResults: true
-        });
-    }
+    //     return await this.takeScreenshot({
+    //         name: 'cart-page-validation',
+    //         fullPage: true,
+    //         attachToAllure: true,
+    //         saveToTestResults: true
+    //     });
+    // }
 
-    /**
-     * Take a screenshot on test failure with enhanced context
-     * Improved naming to avoid generic locator-failure names
-     */
-    async takeFailureScreenshot(errorMessage?: string): Promise<string> {
-        const timestamp = await currentTime();
-        const name = `failure-${errorMessage ? errorMessage.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '-') : 'unknown'}`;
+    // /**
+    //  * Take a screenshot on test failure with enhanced context
+    //  * Improved naming to avoid generic locator-failure names
+    //  */
+    // async takeFailureScreenshot(errorMessage?: string): Promise<string> {
+    //     const timestamp = await currentTime();
+    //     const name = `failure-${errorMessage ? errorMessage.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '-') : 'unknown'}`;
         
-        console.log(`${timestamp} - [screenshot] ❌ Taking failure screenshot: ${name}`);
+    //     console.log(`${timestamp} - [screenshot] ❌ Taking failure screenshot: ${name}`);
         
-        return await this.takeScreenshot({
-            name,
-            fullPage: true,
-            attachToAllure: true,
-            saveToTestResults: true
-        });
-    }
+    //     return await this.takeScreenshot({
+    //         name,
+    //         fullPage: true,
+    //         attachToAllure: true,
+    //         saveToTestResults: true
+    //     });
+    // }
 
-    /**
-     * Take a step screenshot for Allure integration
-     * Used by AllureLogger for step-by-step documentation
-     */
-    async takeStepScreenshot(stepName: string): Promise<string> {
-        const timestamp = await currentTime();
-        const sanitizedStepName = stepName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-        const name = `step-${sanitizedStepName}`;
+    // /**
+    //  * Take a step screenshot for Allure integration
+    //  * Used by AllureLogger for step-by-step documentation
+    //  */
+    // async takeStepScreenshot(stepName: string): Promise<string> {
+    //     const timestamp = await currentTime();
+    //     const sanitizedStepName = stepName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    //     const name = `step-${sanitizedStepName}`;
         
-        console.log(`${timestamp} - [screenshot] 📋 Taking step screenshot: ${stepName}`);
+    //     console.log(`${timestamp} - [screenshot] 📋 Taking step screenshot: ${stepName}`);
         
-        return await this.takeScreenshot({
-            name,
-            fullPage: true,
-            attachToAllure: true,
-            saveToTestResults: true
-        });
-    }
+    //     return await this.takeScreenshot({
+    //         name,
+    //         fullPage: true,
+    //         attachToAllure: true,
+    //         saveToTestResults: true
+    //     });
+    // }
 
-    /**
-     * Get the screenshot directory for external access
-     */
-    getScreenshotDirectory(): string {
-        return this.screenshotDir;
-    }
+    // /**
+    //  * Get the screenshot directory for external access
+    //  */
+    // getScreenshotDirectory(): string {
+    //     return this.screenshotDir;
+    // }
 
     /**
      * Static method to clean old screenshots
      * Prevents disk space issues from accumulating screenshots
      */
-    static cleanOldScreenshots(daysOld = 7): void {
+    static cleanOldScreenshots(daysOld = 2): void {
         const screenshotsDir = path.join('test-results', 'screenshots');
         if (!fs.existsSync(screenshotsDir)) return;
 
@@ -185,7 +186,7 @@ export class ScreenshotManager {
         });
 
         if (cleanedCount > 0) {
-            console.log(`🧹 Cleaned ${cleanedCount} old screenshot directories`);
+            console.log(` [screenshot MNG] - Cleaned ${cleanedCount} old screenshot directories`);
         }
     }
 }

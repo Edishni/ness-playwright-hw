@@ -17,7 +17,7 @@ export class TestHooks {
     description?: string
   ): Promise<void> {
     try {
-      console.log(`${await currentTime()} - [test-hooks] 📸 Taking screenshot: ${name}`);
+      console.log(`${await currentTime()} - [screenshot test-hooks] Taking screenshot: ${name}`);
       
       const screenshot = await page.screenshot({ 
         fullPage: true,
@@ -37,13 +37,13 @@ export class TestHooks {
           screenshot, 
           'image/png'
         );
-        console.log(`${await currentTime()} - [test-hooks] ✅ Screenshot attached to Allure: ${name}`);
+        console.log(`${await currentTime()} - [screenshot test-hooks] ✅ Screenshot attached to Allure: ${name}`);
       } catch (allureError) {
-        console.warn(`${await currentTime()} - [test-hooks] ⚠️ Failed to attach to Allure: ${allureError}`);
+        console.warn(`${await currentTime()} - [screenshot test-hooks] ❌ Failed to attach to Allure: ${allureError}`);
       }
       
     } catch (error) {
-      console.error(`${await currentTime()} - [test-hooks] ❌ Failed to take screenshot: ${error}`);
+      console.error(`${await currentTime()} - [screenshot test-hooks] ❌ Failed to take screenshot: ${error}`);
     }
   }
   
@@ -51,7 +51,7 @@ export class TestHooks {
    * Enhanced test step annotation for better Allure reporting
    */
   static async step<T>(name: string, body: () => Promise<T>): Promise<T> {
-    console.log(`${await currentTime()} - [test-step] 🔄 Starting: ${name}`);
+    console.log(`${await currentTime()} - [test-step] Starting: ${name}`);
     
     return await allure.step(name, async () => {
       try {
@@ -66,42 +66,10 @@ export class TestHooks {
   }
   
   /**
-   * Attach test data to reports with consistent formatting
-   */
-  static async attachData(
-    testInfo: TestInfo, 
-    name: string, 
-    data: any, 
-    type: 'json' | 'text' = 'json'
-  ): Promise<void> {
-    try {
-      const content = type === 'json' ? JSON.stringify(data, null, 2) : String(data);
-      const contentType = type === 'json' ? 'application/json' : 'text/plain';
-      
-      // Attach to test info
-      testInfo.attach(name, {
-        body: content,
-        contentType
-      });
-      
-      // Attach to Allure
-      try {
-        await allure.attachment(name, content, contentType);
-        console.log(`${await currentTime()} - [test-hooks] ✅ Data attached: ${name}`);
-      } catch (allureError) {
-        console.warn(`${await currentTime()} - [test-hooks] ⚠️ Failed to attach data to Allure: ${allureError}`);
-      }
-      
-    } catch (error) {
-      console.error(`${await currentTime()} - [test-hooks] ❌ Failed to attach data: ${error}`);
-    }
-  }
-  
-  /**
    * Test setup with enhanced reporting
    */
   static async beforeEach(testInfo: TestInfo, page: Page): Promise<void> {
-    console.log(`${await currentTime()} - [test-hooks] 🚀 Test starting: ${testInfo.title}`);
+    console.log(`${await currentTime()} - [test-hooks] Test starting: ${testInfo.title}`);
     
     // Add test info to Allure
     await allure.epic('E-Commerce Testing');
@@ -115,7 +83,7 @@ export class TestHooks {
    */
   static async afterEach(testInfo: TestInfo, page: Page): Promise<void> {
     if (testInfo.status === 'failed') {
-      console.log(`${await currentTime()} - [test-hooks] 📸 Test failed - taking failure screenshot`);
+      console.log(`${await currentTime()} - [test-hooks] ❌ Test failed - taking failure screenshot`);
       await TestHooks.takeScreenshot(
         page, 
         testInfo, 
@@ -124,6 +92,6 @@ export class TestHooks {
       );
     }
     
-    console.log(`${await currentTime()} - [test-hooks] 🏁 Test finished: ${testInfo.title} (${testInfo.status})`);
+    console.log(`${await currentTime()} - [test-hooks] Test finished: ${testInfo.title} (${testInfo.status})`);
   }
 }

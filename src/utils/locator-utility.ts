@@ -18,7 +18,7 @@ export async function getElement(page: Page, locators: LocatorDef[], options?: {
         const locator = page.locator(selector);
         const count = await locator.count();
         if (count > 0) {
-          console.log(`${await currentTime()} - [locator] success: ${loc.type}=${loc.value} (attempt ${attempt})`);
+          console.log(`${await currentTime()} - [locator] ✅ success: ${loc.type}=${loc.value} (attempt ${attempt})`);
           return locator.first();
         }
       } catch (e) {
@@ -26,17 +26,20 @@ export async function getElement(page: Page, locators: LocatorDef[], options?: {
       }
       await page.waitForTimeout(backoffBase * attempt);
     }
-    console.warn(`${await currentTime()} - [locator] failed for ${loc.type}=${loc.value}, trying next`);
+    console.warn(`${await currentTime()} - [locator] ❌ failed for ${loc.type}=${loc.value}, trying next`);
   }
-  
+
   // Generate meaningful screenshot name with test info
   let testName = 'unknown-test';
   if (options?.testInfo) {
     const titleSlug = options.testInfo.title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
     testName = `${options.testInfo.project.name}-${titleSlug}`;
   }
-  
+
   const failurePath = `test-results/screenshots/locator-failure-${testName}-${Date.now()}.png`;
-  try { await page.screenshot({ path: failurePath, fullPage: true }); } catch (e) {}
-  throw new Error(`All locators failed: ${locators.map(l=>l.value).join(', ')}; screenshot: ${failurePath}`);
+  try {
+    await page.screenshot({ path: failurePath, fullPage: true });
+    console.log(`${await currentTime()} - [screenshot locatorUtil] ❌ All locators failed, screenshot saved: ${failurePath}`);
+  } catch (e) { }
+  throw new Error(`All locators failed: ${locators.map(l => l.value).join(', ')}; screenshot: ${failurePath}`);
 }

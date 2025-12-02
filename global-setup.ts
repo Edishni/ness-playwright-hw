@@ -4,7 +4,7 @@ import * as path from 'path';
 import { ScreenshotManager } from './src/utils/screenshot-manager';
 
 async function globalSetup(config: FullConfig) {
-    console.log('🚀 Starting global setup...');
+    console.log('Starting global setup...');
     
     // Create necessary directories
     const directories = [
@@ -17,13 +17,9 @@ async function globalSetup(config: FullConfig) {
     directories.forEach(dir => {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
-            console.log(`📁 Created directory: ${dir}`);
+            console.log(`Created directory: ${dir}`);
         }
     });
-    
-    // Clean old screenshots (older than 7 days)
-    console.log('🧹 Cleaning old test artifacts...');
-    ScreenshotManager.cleanOldScreenshots(7);
     
     // Set environment info for Allure
     const envInfo = {
@@ -41,9 +37,9 @@ async function globalSetup(config: FullConfig) {
         .join('\n');
         
     fs.writeFileSync(envPath, envContent);
-    console.log('📝 Created environment.properties for Allure');
+    console.log('Created environment.properties for Allure');
     
-    console.log('✅ Global setup completed');
+    console.log('Global setup completed');
 }
 
 export default globalSetup;

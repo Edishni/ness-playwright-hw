@@ -1,7 +1,7 @@
-import { Page, Locator } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { getElement, LocatorDef } from '../utils/locator-utility';
 import { currentTime } from '../utils/time-utility';
-import { allure } from 'allure-playwright';
+
 
 export abstract class BasePage {
   protected page: Page;
@@ -21,38 +21,6 @@ export abstract class BasePage {
     });
     
     console.log(`${await currentTime()} - [nav] ✅ Navigation completed`);
-  }
-
-  /**
-   * Take a screenshot with proper naming convention
-   */
-  protected async takeScreenshot(name: string, attachToAllure: boolean = false): Promise<void> {
-    try {
-      const timestamp = await currentTime();
-      const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '-');
-      const filename = `${sanitizedName}-${timestamp.replace(/[:.\s]/g, '-')}.png`;
-      
-      const screenshotBuffer = await this.page.screenshot({
-        fullPage: true,
-        path: `test-results/${filename}`
-      });
-      
-      if (attachToAllure && typeof allure !== 'undefined') {
-        await allure.attachment(name, screenshotBuffer, 'image/png');
-      }
-      
-      console.log(`${timestamp} - [screenshot] 📸 Saved: ${filename}`);
-    } catch (error) {
-      console.log(`${await currentTime()} - [screenshot] ⚠️ Failed: ${error}`);
-    }
-  }
-
-  /**
-   * Take screenshot on element interaction failure
-   */
-  protected async takeFailureScreenshot(action: string, error: any): Promise<void> {
-    const errorMessage = error instanceof Error ? error.message.slice(0, 30) : 'unknown-error';
-    await this.takeScreenshot(`failure-${action}-${errorMessage}`, true);
   }
 
   protected async click(locators: LocatorDef | LocatorDef[]) {

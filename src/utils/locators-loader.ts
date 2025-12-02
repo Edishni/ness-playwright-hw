@@ -8,7 +8,6 @@ export interface LocatorsData {
   product: Record<string, LocatorDef[]>;
   cart: Record<string, LocatorDef[]>;
   variants: Record<string, LocatorDef[]>;
-  fallback: Record<string, LocatorDef[]>;
 }
 
 /**
@@ -70,19 +69,13 @@ export const SearchResultsLocators = {
   resultItem: () => locatorsLoader.getLocators('searchResults', 'resultItem'),
   itemLink: () => locatorsLoader.getLocators('searchResults', 'itemLink'),
   itemPrice: () => locatorsLoader.getLocators('searchResults', 'itemPrice'),
-  itemPriceRange: () => locatorsLoader.getLocators('searchResults', 'itemPriceRange'),
   itemTitle: () => locatorsLoader.getLocators('searchResults', 'itemTitle'),
-  itemCondition: () => locatorsLoader.getLocators('searchResults', 'itemCondition'),
-  itemRating: () => locatorsLoader.getLocators('searchResults', 'itemRating'),
   itemImage: () => locatorsLoader.getLocators('searchResults', 'itemImage'),
   freeShippingBadge: () => locatorsLoader.getLocators('searchResults', 'freeShippingBadge'),
   filterSidebar: () => locatorsLoader.getLocators('searchResults', 'filterSidebar'),
   minPriceInput: () => locatorsLoader.getLocators('searchResults', 'minPriceInput'),
   maxPriceInput: () => locatorsLoader.getLocators('searchResults', 'maxPriceInput'),
-  priceRangeContainer: () => locatorsLoader.getLocators('searchResults', 'priceRangeContainer'),
   priceRangeApplyButton: () => locatorsLoader.getLocators('searchResults', 'priceRangeApplyButton'),
-  applyFiltersButton: () => locatorsLoader.getLocators('searchResults', 'applyFiltersButton'),
-  sortDropdown: () => locatorsLoader.getLocators('searchResults', 'sortDropdown'),
   paginationNextButton: () => locatorsLoader.getLocators('searchResults', 'paginationNextButton')
 };
 
@@ -92,19 +85,12 @@ export const ProductLocators = {
   addToCartButton: () => locatorsLoader.getLocators('product', 'addToCartButton'),
   seeInCartButton: () => locatorsLoader.getLocators('product', 'seeInCartButton'),
   buyNowButton: () => locatorsLoader.getLocators('product', 'buyNowButton'),
-  productCondition: () => locatorsLoader.getLocators('product', 'productCondition'),
   quantityInput: () => locatorsLoader.getLocators('product', 'quantityInput'),
   productImage: () => locatorsLoader.getLocators('product', 'productImage'),
-  sellerInfo: () => locatorsLoader.getLocators('product', 'sellerInfo'),
-  sellerName: () => locatorsLoader.getLocators('product', 'sellerName'),
-  sellerRating: () => locatorsLoader.getLocators('product', 'sellerRating'),
   shippingInfo: () => locatorsLoader.getLocators('product', 'shippingInfo'),
   itemSpecifics: () => locatorsLoader.getLocators('product', 'itemSpecifics'),
   productDescription: () => locatorsLoader.getLocators('product', 'productDescription'),
-  watchlistButton: () => locatorsLoader.getLocators('product', 'watchlistButton'),
-  shareButton: () => locatorsLoader.getLocators('product', 'shareButton'),
-  contactSellerButton: () => locatorsLoader.getLocators('product', 'contactSellerButton'),
-  returnPolicyLink: () => locatorsLoader.getLocators('product', 'returnPolicyLink')
+  watchlistButton: () => locatorsLoader.getLocators('product', 'watchlistButton')
 };
 
 export const CartLocators = {
@@ -120,7 +106,7 @@ export const CartLocators = {
   continueShoppingButton: () => locatorsLoader.getLocators('cart', 'continueShoppingButton'),
   addedToCartDialog: () => locatorsLoader.getLocators('cart', 'addedToCartDialog'),
   addedToCartHeader: () => locatorsLoader.getLocators('cart', 'addedToCartHeader'),
-  dialogCloseButton: () => locatorsLoader.getLocators('cart', 'dialogCloseButton'),
+  anyDialogCloseButton: () => locatorsLoader.getLocators('cart', 'anyDialogCloseButton'),
   dialogParentFromHeader: () => locatorsLoader.getLocators('cart', 'dialogParentFromHeader'),
   closeButtonWithinDialog: () => locatorsLoader.getLocators('cart', 'closeButtonWithinDialog'),
   cartBadgeCount: () => locatorsLoader.getLocators('cart', 'cartBadgeCount')
@@ -133,17 +119,5 @@ export const VariantLocators = {
   variantFirstOption: () => locatorsLoader.getLocators('variants', 'variantFirstOption'),
   variantAllOptions: () => locatorsLoader.getLocators('variants', 'variantAllOptions'),
   variantOptionValue: () => locatorsLoader.getLocators('variants', 'variantOptionValue'),
-  sizeSelect: () => locatorsLoader.getLocators('variants', 'sizeSelect'),
-  sizeButton: () => locatorsLoader.getLocators('variants', 'sizeButton'),
-  colorButton: () => locatorsLoader.getLocators('variants', 'colorButton'),
-  colorInput: () => locatorsLoader.getLocators('variants', 'colorInput'),
   quantitySelect: () => locatorsLoader.getLocators('variants', 'quantitySelect'),
-  materialSelect: () => locatorsLoader.getLocators('variants', 'materialSelect'),
-  styleSelect: () => locatorsLoader.getLocators('variants', 'styleSelect')
-};
-
-export const FallbackLocators = {
-  addToCartButtons: () => locatorsLoader.getLocators('fallback', 'addToCartButtons'),
-  cartButtons: () => locatorsLoader.getLocators('fallback', 'cartButtons'),
-  cartTotalElements: () => locatorsLoader.getLocators('fallback', 'cartTotalElements')
 };
