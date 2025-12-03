@@ -306,7 +306,7 @@ export class EbayProductPage extends BasePage {
             await this.closeAnyDialog(page);
             console.log(`${await currentTime()} - [dialog] ✅ Wrong dialog closed successfully`);
           } catch (closeError) {
-            console.warn(`${await currentTime()} - [dialog] ⚠️ Could not close wrong dialog: ${closeError instanceof Error ? closeError.message : 'Unknown error'}`);
+            console.error(`${await currentTime()} - [dialog] ❌ Could not close wrong dialog: ${closeError instanceof Error ? closeError.message : 'Unknown error'}`);
           }
 
           // Wait a bit before retrying
@@ -327,7 +327,7 @@ export class EbayProductPage extends BasePage {
         return true;
 
       } catch (error) {
-        console.error(`${await currentTime()} - [dialog] Error during validation attempt ${attempt}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error(`${await currentTime()} - [dialog] ❌ Error during validation attempt ${attempt}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         if (attempt === maxAttempts) return false;
         attempt++;
       }
@@ -534,13 +534,24 @@ export class EbayProductPage extends BasePage {
 
         console.log(`${await currentTime()} - [cart] Successfully added item from ${url.slice(0, 40)}...`);
 
+
+        const timestamp = await currentTime();
+        const screenshotName = `cart-add-success-${timestamp.replace(/[:.\s]/g, '-')}.png`;
+
+        console.log(`${timestamp} - [screenshot prodPg] ✅ Added screenshot of item ${index + 1} for  'test-results'`);
+
+        await this.page.screenshot({
+          fullPage: false,
+          path: `test-results/screenshots/${screenshotName}`
+        });
+
         if (testInfo) {
-          const screenshot = await page.screenshot();
+          const screenshot = await page.screenshot({fullPage: false});
           testInfo.attach(`cart-add-success-${index}`, {
             body: screenshot,
             contentType: 'image/png'
           });
-          console.log(`${await currentTime()} - [screenshot prodPg] ✅ Attached screenshot for added item ${index + 1}`);
+          console.log(`${await currentTime()} - [screenshot prodPg] ✅ Added screenshot of item ${index + 1} for Playwright report`);
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';

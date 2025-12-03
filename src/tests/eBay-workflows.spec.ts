@@ -35,142 +35,14 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
         }
     });
 
-    // ==================== CR1: Search Items (Unit Tests) ====================
-    testData?.searchScenarios?.forEach((scenario: any, index: number) => {
-        test(`CR1.${index + 1}: Search <${scenario.query}> under price limit : $${scenario.maxPrice}`, async ({ page }, testInfo) => {
-            // Arrange
-            const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-            console.log(`${await currentTime()} - [CR1.${index + 1}] Browser: ${browserName.toUpperCase()} - Starting search for: ${scenario.query}`);
+    // ==================== Complete Integrated Workflow ====================
 
-            const homePage = new EbayHomePage(page);
-
-            // Act
-            await homePage.goto();
-            const urls = await homePage.searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, scenario.limit);
-
-            // Assert
-            expect(urls.length).toBeGreaterThanOrEqual(scenario.expectedMinResults);
-            console.log(`${await currentTime()} - [CR1.${index + 1}] Found ${urls.length} items under $${scenario.maxPrice}`);
-
-            urls.forEach((url, idx) => {
-                console.log(`  ${idx + 1}. ${url.slice(0, 50)}...`);
-            });
-
-            // Log results
-            testInfo.attach('search-results', {
-                body: JSON.stringify(urls, null, 2),
-                contentType: 'application/json'
-            });
-        });
-    });
-
-    // ==================== CR2: Add to Cart (Unit Tests) ====================
-
-    test('CR2: Add single item to cart with variant selection', async ({ page }, testInfo) => {
-        // Arrange
-        const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-        const scenario = testData.searchScenarios[0];
-        console.log(`${await currentTime()} - [CR21] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add item to cart`);
-
-        const homePage = new EbayHomePage(page);
-
-        // Act - Search
-        await homePage.goto();
-        const urls = await homePage.searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, 1);
-
-        expect(urls.length).toBeGreaterThan(0);
-
-        urls.forEach((url, idx) => {
-            console.log(`  ${idx + 1}. ${url.slice(0, 50)}...`);
-        });
-        // Add item to cart
-        const productPage = new EbayProductPage(page);
-        await productPage.addItemsToCart(page, urls.slice(0, 1), testInfo);
-
-        console.log(`${await currentTime()} - [CR2] Item added to cart`);
-        const cartPage = new CartPage(page);
-        await cartPage.gotoCart();
-        const cartTotal = await cartPage.getTotal();
-
-        console.log(`${await currentTime()} - [CR2] ${urls.length} items in cart, Total: ${cartTotal}`);
-        expect(cartTotal).toBeGreaterThan(0);
-        testInfo.attach('cart-action', {
-            body: JSON.stringify({ itemsAdded: urls.slice(0, 1) }, null, 2),
-            contentType: 'application/json'
-        });
-    });
-
-    test('CR3: Add multiple items to cart', async ({ page }, testInfo) => {
-        // Arrange
-        const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-        const scenario = testData.searchScenarios[0];
-        const cartTest = testData.cartTests[1];
-        console.log(`${await currentTime()} - [CR3] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add ${cartTest.itemsToAdd} items to cart`);
-
-        const homePage = new EbayHomePage(page);
-
-        // Act - Search for multiple items
-        await homePage.goto();
-        const urls = await homePage.searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, cartTest.itemsToAdd);
-
-        expect(urls.length).toBeGreaterThanOrEqual(1);
-
-        // Add items to cart
-        const productPage = new EbayProductPage(page);
-        await productPage.addItemsToCart(page, urls, testInfo);
-
-
-        console.log(`${await currentTime()} - [CR3] ${urls.length} items added to cart`);
-
-        const cartPage = new CartPage(page);
-        await cartPage.gotoCart();
-        const cartTotal = await cartPage.getTotal();
-
-        console.log(`${await currentTime()} - [CR3] ${urls.length} items in cart, Total: ${cartTotal}`);
-        expect(cartTotal).toBeGreaterThan(0);
-
-        testInfo.attach('cart-action', {
-            body: JSON.stringify({ itemsAdded: urls }, null, 2),
-            contentType: 'application/json'
-        });
-    });
-
-    test('CR4: Add max items and verify cart contents', async ({ page }, testInfo) => {
-        // Arrange
-        const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-        const scenario = testData.searchScenarios[0];
-        const cartTest = testData.cartTests[2]; // 5 items
-        console.log(`${await currentTime()} - [CR4] Browser: ${browserName.toUpperCase()} - Search <${scenario.query}> and add up to ${cartTest.itemsToAdd} items`);
-
-        const homePage = new EbayHomePage(page);
-        const cartPage = new CartPage(page);
-
-        // Act - Search for multiple items
-        await homePage.goto();
-        const urls = await homePage.searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, cartTest.itemsToAdd);
-
-        expect(urls.length).toBeGreaterThanOrEqual(1);
-
-        // Add items to cart
-        const productPage = new EbayProductPage(page);
-        await productPage.addItemsToCart(page, urls, testInfo);
-
-        // Verify cart
-        await cartPage.gotoCart();
-        const cartTotal = await cartPage.getTotal();
-
-        console.log(`${await currentTime()} - [CR4] ${urls.length} items in cart, Total: $${cartTotal}`);
-        expect(cartTotal).toBeGreaterThan(0);
-    });
-
-    // ==================== CR5: Complete Integrated Workflow ====================
-
-    test('CR5: Complete Search and Cart Workflow - Multiple Search Terms with Cart Integration', async ({ page }, testInfo) => {
+    test('Complete Search and Cart Workflow - Multiple Search Terms with Cart Integration', async ({ page }, testInfo) => {
         // Setup test hooks
         await TestHooks.beforeEach(testInfo, page);
 
         const browserName = testInfo.project.name || page.context().browser()?.browserType().name() || 'unknown';
-        console.log(`${await currentTime()} - [CR5] Browser: ${browserName.toUpperCase()} - Starting Complete Search & Cart Integration Workflow`);
+        console.log(`${await currentTime()} - Browser: ${browserName.toUpperCase()} - Starting Complete Search & Cart Integration Workflow`);
 
         const homePage = new EbayHomePage(page);
 
@@ -179,11 +51,11 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
 
         // Step 1: Loop through search scenarios (like CR1.1-1.5)
         await TestHooks.step('Phase 1: Search Items from Multiple Categories', async () => {
-            console.log(`${await currentTime()} - [CR5] Phase 1: Search Items from Multiple Categories`);
+            console.log(`${await currentTime()} - Phase 1: Search Items from Multiple Categories`);
 
             for (const [index, scenario] of testData.searchScenarios.entries()) {
                 console.log("-------------------------");
-                console.log(`${await currentTime()} - [CR5.${index + 1}] Searching for: ${scenario.query} under $${scenario.maxPrice}`);
+                console.log(`${await currentTime()} - [${index + 1}] Searching for: ${scenario.query} under ${scenario.maxPrice}`);
 
                 await homePage.goto();
                 const urls = await homePage.searchItemsByNameUnderPrice(page, scenario.query, scenario.maxPrice, scenario.limit);
@@ -193,7 +65,7 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
                 // Collect URLs for cart addition
                 allUrls.push(...urls);
 
-                console.log(`${await currentTime()} - [CR5.${index + 1}] Found ${urls.length} items for "${scenario.query}"`);
+                console.log(`${await currentTime()} - [${index + 1}] Found ${urls.length} items for "${scenario.query}"`);
                 urls.forEach((url, idx) => {
                     console.log(`    ${idx + 1}. ${url.slice(0, 60)}...`);
                 });
@@ -201,7 +73,7 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
         });
 
         // Step 2: Generate consolidated links report
-        console.log(`${await currentTime()} - [CR5] Phase 2: Generated ${allUrls.length} total product links`);
+        console.log(`${await currentTime()} - Phase 2: Generated ${allUrls.length} total product links`);
 
         testInfo.attach('all-search-results', {
             body: JSON.stringify({
@@ -213,7 +85,7 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
         });
 
         // Step 3: Add items to cart (like CR2.1-2.3)
-        console.log(`${await currentTime()} - [CR5] Phase 3: Adding Items to Cart`);
+        console.log(`${await currentTime()} - Phase 3: Adding Items to Cart`);
 
         // Limit to reasonable number for cart testing
         const itemsToAdd = Math.min(allUrls.length, 5);
@@ -235,7 +107,7 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
         let cartTotal: number = 0;
 
         await TestHooks.step('Phase 4: Cart Verification', async () => {
-            console.log(`${await currentTime()} - [CR5] Phase 4: Cart Verification`);
+            console.log(`${await currentTime()} - Phase 4: Cart Verification`);
             console.log("================================================");
             const cartPage = new CartPage(page);
             await cartPage.gotoCart();
@@ -270,7 +142,7 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
                 testInfo
             );
 
-            console.log(`${await currentTime()} - [CR5] ✅ Complete Workflow Success:`);
+            console.log(`${await currentTime()} - ✅ Complete Workflow Success:`);
             console.log(`  - Searched ${testData.searchScenarios.length} categories`);
             console.log(`  - Found ${allUrls.length} total products`);
             console.log(`  - Added ${selectedUrls.length} items to cart`);
@@ -285,7 +157,7 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
 
             testInfo.attach('workflow-summary', {
                 body: JSON.stringify({
-                    workflow: 'CR5 - Complete Search & Cart Integration',
+                    workflow: 'Complete Search & Cart Integration',
                     searchCategories: testData.searchScenarios.length,
                     totalProductsFound: allUrls.length,
                     itemsAddedToCart: selectedUrls.length,

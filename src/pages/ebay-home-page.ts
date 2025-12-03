@@ -30,7 +30,7 @@ export class EbayHomePage extends BasePage {
     maxPrice: number,
     limit = 5
   ): Promise<string[]> {
-    console.log(`${await currentTime()} - [search] Starting search: "${query}" under $${maxPrice} (limit: ${limit})`);
+    console.log(`${await currentTime()} - [search] Starting search: "${query}" under ${maxPrice} (limit: ${limit})`);
     // Simple flow: use site search, apply price filter, collect links
     const inputLocs: LocatorDef[] = new EbayHomePage(page).searchInput;
     const buttonLocs: LocatorDef[] = new EbayHomePage(page).searchButton;
@@ -53,7 +53,7 @@ export class EbayHomePage extends BasePage {
     }
 
     // Apply price range filter with maxPrice
-    console.log(`${await currentTime()} - [filter] Applying price filter: Max $${maxPrice}`);
+    console.log(`${await currentTime()} - [filter] Applying price filter: Max ${maxPrice}`);
     const priceFilterApplied = await this.setPriceRange(page, undefined, maxPrice);
 
     if (priceFilterApplied) {

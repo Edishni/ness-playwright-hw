@@ -63,7 +63,7 @@ export class CartPage extends BasePage {
       const isWithinBudget = total <= expectedMax;
 
       console.log(
-        `[cart] Cart Total: $${total}, Budget Max: $${expectedMax}, Items: ${actualCount}, Expected: ${expectedItemsCount}, Within Budget: ${isWithinBudget}`
+        `[cart] Cart Total: ${total}, Budget Max: ${expectedMax}, Items: ${actualCount}, Expected: ${expectedItemsCount}, Within Budget: ${isWithinBudget}`
       );
 
       return isWithinBudget;
@@ -132,7 +132,9 @@ export class CartPage extends BasePage {
           console.log(`${await currentTime()} - [locator] trying ${locatorDef.type}=${locatorDef.value}`);
 
           // const elements = await this.page.$$(locatorDef.value);
-          const elements = await this.page.$$(locatorDef.value);
+          // if (elements.length > 0) {
+
+          const elements = await this.page.locator(locatorDef.value).all();
           if (elements.length > 0) {
             console.log(`${await currentTime()} - [locator] success: found ${elements.length} cart items`);
 
@@ -143,7 +145,7 @@ export class CartPage extends BasePage {
               let title = 'Unknown Title';
               for (const titleLocator of cartItemTitleLocators) {
                 try {
-                  const titleElement = await element.$(titleLocator.value);
+                  const titleElement = await element.locator(titleLocator.value);
                   if (titleElement) {
                     const titleText = await titleElement.textContent();
                     if (titleText?.trim()) {
@@ -160,7 +162,7 @@ export class CartPage extends BasePage {
               let price = '0';
               for (const priceLocator of cartItemPriceLocators) {
                 try {
-                  const priceElement = await element.$(priceLocator.value);
+                  const priceElement = await element.locator(priceLocator.value);
                   if (priceElement) {
                     const priceText = await priceElement.textContent();
                     if (priceText?.trim()) {
@@ -177,7 +179,7 @@ export class CartPage extends BasePage {
               let quantity = 1;
               for (const quantityLocator of cartItemQuantityLocators) {
                 try {
-                  const quantityElement = await element.$(quantityLocator.value);
+                  const quantityElement = await element.locator(quantityLocator.value);
                   if (quantityElement) {
                     const quantityText = await quantityElement.textContent() || await quantityElement.inputValue();
                     if (quantityText?.trim()) {
