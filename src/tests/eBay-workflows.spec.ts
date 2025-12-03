@@ -144,10 +144,10 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
             console.log(`${await currentTime()} - ✅ Complete Workflow Success:`);
             console.log(`  - Searched ${testData.searchScenarios.length} categories`);
             console.log(`  - Found ${allUrls.length} total products`);
-            console.log(`  - Added ${selectedUrls.length} items to cart`);
+            console.log(`  - Added ${cartItems.length} items to cart`);
             console.log(`  - Cart total: ${cartTotal}`);
-            console.log(`  - Valid budget: ${budgetTest.budgetPerItem * selectedUrls.length}`);
-            console.log(`  - Budget compliance: ${isWithinBudget ? 'PASSED' : 'FAILED'}`);
+            console.log(`  - Valid budget: ${budgetTest.budgetPerItem * cartItems.length}`);
+            console.log(`  - Budget compliance: ${isWithinBudget ? '✅ PASSED' : '❌ FAILED'}`);
 
             // Assert final workflow success
             expect(allUrls.length).toBeGreaterThan(0);

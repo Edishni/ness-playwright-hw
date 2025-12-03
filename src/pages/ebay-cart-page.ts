@@ -59,7 +59,7 @@ export class CartPage extends BasePage {
         console.log(`${await currentTime()} - [cart] ${i + 1}. ${item.title.slice(0, 60)}... - ${item.price} (qty: ${item.quantity})`);
       }
       // Calculate expected max
-      const expectedMax = budgetPerItem * expectedItemsCount;
+      const expectedMax = budgetPerItem * actualCount;
       const isWithinBudget = total <= expectedMax;
 
       console.log(

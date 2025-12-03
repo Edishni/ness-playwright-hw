@@ -70,16 +70,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Upgrade Node to 20 so allure-commandline v3 runs cleanly
     - uses: actions/setup-node@v4
       with:
         node-version: '18'
+
+    - name: Install Allure CLI (v2.22.0, Node 18 supported)
+      run: npm install -g allure-commandline@2.22.0
 
     - name: Download all artifacts
       uses: actions/download-artifact@v4
 
     - name: Generate Allure HTML Report
       run: |
-        npx allure generate allure-results* --clean -o allure-report
+        results=$(ls -d allure-results-*)
+        echo "Merging results from: $results"
+        allure generate $results --clean -o allure-report
 
     - name: Upload Allure HTML Report
       uses: actions/upload-artifact@v4
