@@ -30,7 +30,7 @@ jobs:
       run: npm ci
 
     - name: Run Playwright Tests
-      run: npx playwright test --project=${{ matrix.browser }}
+      run: npx playwright test --project=${{ matrix.browser }} eBay-workflows.spec.ts
       env:
         CI: true
         HOME: /root

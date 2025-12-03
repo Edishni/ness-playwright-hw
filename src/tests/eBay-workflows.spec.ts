@@ -20,13 +20,13 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
             const context = page.context();
             const pages = context.pages();
 
-            // console.log(`${await currentTime()} - [teardown] Closing ${pages.length} page(s)...`);
+            console.log(`${await currentTime()} - [teardown] Closing ${pages.length} page(s)...`);
 
-            // for (const p of pages) {
-            //     if (!p.isClosed()) {
-            //         await p.close();
-            //     }
-            // }
+            for (const p of pages) {
+                if (!p.isClosed()) {
+                    await p.close();
+                }
+            }
 
             console.log(`${await currentTime()} - [teardown] ✅ All pages closed successfully`);
 
@@ -45,7 +45,6 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
         console.log(`${await currentTime()} - Browser: ${browserName.toUpperCase()} - Starting Complete Search & Cart Integration Workflow`);
 
         const homePage = new EbayHomePage(page);
-
 
         let allUrls: string[] = [];
 

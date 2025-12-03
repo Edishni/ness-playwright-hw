@@ -45,7 +45,7 @@ export default defineConfig({
     outputDir: 'test-results',
     fullyParallel: true, // Enable parallel for CI stability
     use: {
-        headless: false, // help to decrese anti-bot detection
+        headless: true, // help to decrese anti-bot detection
         viewport: { width: 1280, height: 720 },
         ignoreHTTPSErrors: true,
         screenshot: {
