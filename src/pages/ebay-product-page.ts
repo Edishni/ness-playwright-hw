@@ -55,12 +55,12 @@ export class EbayProductPage extends BasePage {
 
               console.log(`${await currentTime()} - [variant] Clicking to open dropdown...`);
               // Click to open dropdown
-              await button.waitFor({ state: 'visible', timeout: 3000 });
-              await button.click({ timeout: 3000 });
+              await button.waitFor({ state: 'visible', timeout: 5000 });
+              await button.click({ timeout: 5000 });
               console.log(`${await currentTime()} - [variant] ✅ Dropdown clicked (attempt ${totalSelected + 1})`);
 
               // Wait for dropdown to open and stabilize (longer wait to prevent dropdown from closing)
-              await page.waitForTimeout(1200);
+              await page.waitForTimeout(3000);
 
               // Verify dropdown actually opened
               console.log(`${await currentTime()} - [variant] Verifying dropdown opened...`);
