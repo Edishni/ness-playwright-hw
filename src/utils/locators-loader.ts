@@ -84,6 +84,7 @@ export const ProductLocators = {
   productPrice: () => locatorsLoader.getLocators('product', 'productPrice'),
   addToCartButton: () => locatorsLoader.getLocators('product', 'addToCartButton'),
   seeInCartButton: () => locatorsLoader.getLocators('product', 'seeInCartButton'),
+  placeBidButton: () => locatorsLoader.getLocators('product', 'placeBidButton'),
   buyNowButton: () => locatorsLoader.getLocators('product', 'buyNowButton'),
   quantityInput: () => locatorsLoader.getLocators('product', 'quantityInput'),
   productImage: () => locatorsLoader.getLocators('product', 'productImage'),

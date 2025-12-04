@@ -1,7 +1,6 @@
 import { FullConfig } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ScreenshotManager } from './src/utils/screenshot-manager';
 
 async function globalSetup(config: FullConfig) {
     console.log('Starting global setup...');

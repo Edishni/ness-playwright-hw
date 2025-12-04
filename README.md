@@ -309,6 +309,9 @@ Generate Allure report (after tests):
 npm run allure:generate
 npm run allure:open
 ```
+Frob pipeline job result we can download allure results and after extraction to run next command:
+npx allure open "C:\file path...\allure-report"
+
 
 Notes:
 - Canonical sources are under `src/` (pages, utils, tests).

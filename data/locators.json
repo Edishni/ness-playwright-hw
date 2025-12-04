@@ -103,9 +103,14 @@
       { "type": "xpath", "value": "//a[@data-testid='x-atc-action' and .//span[contains(text(), 'Add to cart')]]" }
     ],
     "seeInCartButton": [
-      { "type": "css", "value": "[data-testid='x-atc-action']" },
+      { "type": "css", "value": "[id='x-atc-action']" },
       { "type": "role", "value": "link", "name": "See in cart" },
       { "type": "xpath", "value": "//a[contains(text(), 'See in cart')]" }
+    ],
+    "placeBidButton": [
+      { "type": "css", "value": "[data-testid='x-bid-action']" },
+      { "type": "role", "value": "link", "name": "Place bid" },
+      { "type": "xpath", "value": "//a[@data-testid='x-bid-action' and .//span[contains(text(), 'Place bid')]]" }
     ],
     "buyNowButton": [
       { "type": "role", "value": "link", "name": "Buy It Now" },

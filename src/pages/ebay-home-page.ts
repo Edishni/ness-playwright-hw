@@ -29,7 +29,7 @@ export class EbayHomePage extends BasePage {
     query: string,
     maxPrice: number,
     limit = 5
-  ): Promise<string[]> {
+  ): Promise<{ element: Locator, href: string, title: string, price: string }[]> {
     console.log(`${await currentTime()} - [search] Starting search: "${query}" under ${maxPrice} (limit: ${limit})`);
     // Simple flow: use site search, apply price filter, collect links
     const inputLocs: LocatorDef[] = new EbayHomePage(page).searchInput;
@@ -37,9 +37,14 @@ export class EbayHomePage extends BasePage {
 
     console.log(`${await currentTime()} - [search] Filling search input and clicking search button...`);
     // Fill search input and click search button
-    await getElement(page, inputLocs, { timeout: 5000 }).then(l => l.fill(query));
-    await getElement(page, buttonLocs, { timeout: 5000 }).then(l => l.click());
-
+    const input = await getElement(page, inputLocs, { timeout: 5000 });
+    await page.evaluate(() => window.scrollTo(0, 0)); // Scroll to top of the page
+    await page.waitForLoadState('domcontentloaded');
+    await input.clear();
+    await input.fill(query);
+    const searchButton = await getElement(page, buttonLocs, { timeout: 5000 });
+    await searchButton.scrollIntoViewIfNeeded();
+    await searchButton.click();
     // Use domcontentloaded instead of networkidle (Playwright best practice)
     // networkidle is unreliable for dynamic sites like eBay with ongoing ads/tracking
     await page.waitForLoadState('domcontentloaded');
@@ -49,7 +54,7 @@ export class EbayHomePage extends BasePage {
       await page.waitForSelector('.srp-results, .s-results-list-atf', { timeout: 10000 });
       console.log(`${await currentTime()} - [search] ✅ Search completed, results container found`);
     } catch (error) {
-      console.log(`${await currentTime()} - [search] ⚠️ Results container not found, but page loaded - continuing...`);
+      console.log(`${await currentTime()} - [search] ❌ Results container not found, but page loaded - continuing...`);
     }
 
     // Apply price range filter with maxPrice
@@ -61,7 +66,7 @@ export class EbayHomePage extends BasePage {
     } else {
       console.warn(`${await currentTime()} - Price filter failed, continuing with manual filtering`);
     }
-
+    let selectedItems: { element: Locator, href: string, title: string, price: string }[] = [];
     // Collect items with price filtering across multiple pages
     const links: string[] = [];
     let currentPage = 1;
@@ -111,7 +116,7 @@ export class EbayHomePage extends BasePage {
           await linkLocator.waitFor();
 
           // Get href using locator.getAttribute instead of $eval - use centralized locators
-          console.log(`${await currentTime()} - [search] Extracting item link and price: ${itemLinkSelector}`);
+          console.log(`${await currentTime()} - [search] Extracting item link: ${itemLinkSelector}`);
           let href = await linkLocator
             .getAttribute('href', { timeout: 3000 })
             .catch(() => null);
@@ -143,7 +148,7 @@ export class EbayHomePage extends BasePage {
 
             console.log(`${await currentTime()} - [search] Extracted price text: ${finalPriceText}`);
           } catch (err) {
-            console.error(`${await currentTime()} - Failed to extract price text`, err);
+            console.error(`${await currentTime()} - [search] ❌ Failed to extract price text`, err);
           }
 
           // Case 3: no price found
@@ -162,8 +167,10 @@ export class EbayHomePage extends BasePage {
 
           console.log(`${await currentTime()} - [search] ✅ Item added to collection (${links.length + 1}/${limit})`);
           links.push(href);
+          // itemLocatro > linkLocator , we want use it for future clicks!!!
+          selectedItems.push({ element: linkLocator, href, title: titleText ? titleText.trim() : 'No Title', price: finalPriceText || 'No Price' });
         } catch (error) {
-          console.warn(`${await currentTime()} - [search] ⚠️ Could not extract item data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.warn(`${await currentTime()} - [search] ❌ Could not extract item data: ${error instanceof Error ? error.message : 'Unknown error'}`);
           continue; // Skip this item, try next
         }
       }
@@ -179,12 +186,12 @@ export class EbayHomePage extends BasePage {
       const nextButton = await getElement(page, nextButtonLocators, { timeout: 3000 }).catch(() => null);
 
       if (!nextButton) {
-        console.log(`${await currentTime()} - [nav] No next page button found, stopping at ${links.length} items`);
+        console.log(`${await currentTime()} - [next nav] No next page button found, stopping at ${links.length} items`);
         break;
       }
 
       try {
-        console.log(`${await currentTime()} - [nav] Clicking next page button...`);
+        console.log(`${await currentTime()} - [next nav] Clicking next page button...`);
 
         // Wait for navigation to start (URL change or network activity)
         await Promise.all([
@@ -202,15 +209,16 @@ export class EbayHomePage extends BasePage {
           .catch(() => { });
 
         await page.waitForTimeout(1000); // Stabilization delay
-        console.log(`${await currentTime()} - [nav] Successfully navigated to page ${currentPage}`);
+        console.log(`${await currentTime()} - [next nav] Successfully navigated to page ${currentPage}`);
       } catch (error) {
-        console.warn(`${await currentTime()} - Failed to navigate to next page: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.warn(`${await currentTime()} - [next nav] ❌ Failed to navigate to next page: ${error instanceof Error ? error.message : 'Unknown error'}`);
         break;
       }
     }
 
     console.log(`${await currentTime()} - [search] Total items collected: ${links.length} across ${currentPage} page(s)`);
-    return links;
+    // return links;
+    return selectedItems;
   }
 
 

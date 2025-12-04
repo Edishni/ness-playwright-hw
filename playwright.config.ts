@@ -44,22 +44,29 @@ export default defineConfig({
             }]],
     outputDir: 'test-results',
     fullyParallel: true, // Enable parallel for CI stability
-    use: {
-        headless: true, // help to decrese anti-bot detection
-        viewport: { width: 1280, height: 720 },
-        ignoreHTTPSErrors: true,
-        screenshot: {
-            mode: 'only-on-failure', // Keep default for automatic screenshots
-            fullPage: true
+    // If has Moon or Grid integration, use their WS endpoint
+    use: process.env.PLAYWRIGHT_WS
+        ?
+        {
+            connectOptions: { wsEndpoint: process.env.PLAYWRIGHT_WS },
+        }
+        :
+        {
+            headless: true, // help to decrese anti-bot detection
+            viewport: { width: 1280, height: 720 },
+            ignoreHTTPSErrors: true,
+            screenshot: {
+                mode: 'only-on-failure', // Keep default for automatic screenshots
+                fullPage: true
+            },
+            video: {
+                mode: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
+                size: { width: 1280, height: 720 }
+            },
+            trace: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
+            actionTimeout: process.env.CI ? 30000 : 0,
+            navigationTimeout: process.env.CI ? 60000 : 30000,
         },
-        video: {
-            mode: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
-            size: { width: 1280, height: 720 }
-        },
-        trace: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
-        actionTimeout: process.env.CI ? 30000 : 0,
-        navigationTimeout: process.env.CI ? 60000 : 30000,
-    },
     workers: process.env.CI ? 2 : 3,
     projects: [
         { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

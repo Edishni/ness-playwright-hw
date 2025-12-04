@@ -7,7 +7,14 @@ import { loadTestDataForSuite } from '../utils/test-details';
 const testData = loadTestDataForSuite('core-requirements');
 
 test.describe('eBay web shop - unitTests ', () => {
+    
+    test.beforeAll(async ({ browser }) => {
+        console.log("============= Browser details =================");
+        const version = browser.version();
+        const browserName = browser.browserType().name();
+        console.log(`Browser: ${browserName}, Version: ${version}`);
 
+    });
     // Setup teardown to close all pages and context after each test
     test.afterEach(async ({ page }, testInfo) => {
         try {
@@ -50,7 +57,7 @@ test.describe('eBay web shop - unitTests ', () => {
             console.log(`${await currentTime()} - [${index + 1}] Found ${urls.length} items under ${scenario.maxPrice}`);
 
             urls.forEach((url, idx) => {
-                console.log(`  ${idx + 1}. ${url.slice(0, 50)}...`);
+                console.log(`  ${idx + 1}. ${url.href.slice(0, 50)}...`);
             });
 
             // Log results

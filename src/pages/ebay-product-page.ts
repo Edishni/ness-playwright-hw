@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import { BasePage } from './base-page';
 import { getElement } from '../utils/locator-utility';
 import { currentTime } from '../utils/time-utility';
@@ -298,6 +298,15 @@ export class EbayProductPage extends BasePage {
               console.warn(`${await currentTime()} - [dialog] Could not close dialog but item was added successfully`);
             }
             return true;
+          } else {
+            // check if "Place bid" button exists (indicates successful add)
+            const placeBidLocators = ProductLocators.placeBidButton();
+            const placeBidButton = await getElement(page, placeBidLocators, { timeout: 2000 }).catch(() => null);
+
+            if (placeBidButton) {
+              console.log(`${await currentTime()} - [validation] ❌ "Place bid" button found - Not possible to add the item when bidding is required!`);
+              return false;
+            }
           }
 
           console.log(`${await currentTime()} - [dialog] Closing wrong dialog and retrying...`);
@@ -385,12 +394,16 @@ export class EbayProductPage extends BasePage {
     for (const selector of closeDialogSelectors) {
       try {
 
-        const closeButton = await getElement(page, closeDialogSelectors, { timeout: 1000 });
+        const closeButton = await getElement(page, [selector], { timeout: 1000 }).catch(() => null);
+        // const closeButton = await getElement(page, closeDialogSelectors, { timeout: 1000 });
 
-        if (await closeButton.isVisible()) {
+        if (closeButton && await closeButton.isVisible()) {
           await closeButton.click();
           console.log(`${await currentTime()} - [dialog] Closed dialog using selector: ${selector}`);
           await page.waitForTimeout(500); // Wait for dialog to close
+          await closeButton.waitFor({ state: 'detached', timeout: 500 }).catch(async () => {
+            await closeButton.waitFor({ state: 'hidden', timeout: 500 }).catch(() => { });
+          });
           return;
         }
       } catch (error) {
@@ -546,7 +559,7 @@ export class EbayProductPage extends BasePage {
         });
 
         if (testInfo) {
-          const screenshot = await page.screenshot({fullPage: false});
+          const screenshot = await page.screenshot({ fullPage: false });
           testInfo.attach(`cart-add-success-${index}`, {
             body: screenshot,
             contentType: 'image/png'
@@ -561,6 +574,93 @@ export class EbayProductPage extends BasePage {
         throw new Error(`Failed to add item from ${url.slice(0, 70)}: ${errorMsg}`);
       }
     }
+  }
+
+  /**
+   * Add items to cart from product URLs with optional variant selection
+   * @param page - Playwright page object
+   * @param testInfo - Test info for attaching screenshots
+   * @returns Promise<void>
+   */
+  async addSingleItemToCart(
+    page: Page,
+    idx: number,
+    item: {
+      element: Locator;
+      href: string;
+      title: string;
+      price: string;
+    },
+    testInfo?: any
+  ): Promise<void> {
+                    console.log(`    ${idx+1}. Trying to open item page and add to cart:`);
+                    console.log(`    ${item.title.slice(0, 60)}...`);
+                    console.log(`    ${item.href.slice(0, 60)}...`);
+                    console.log(`    ${item.price}`);
+                    
+    // Wait for product page essentials to load
+    try {
+      await page.waitForSelector('#mainContent, .product-details, .notranslate', { timeout: 8000 });
+      console.log(`${await currentTime()} - [product] ✅ Product page content loaded`);
+    } catch (error) {
+      console.log(`${await currentTime()} - [product] ❌ Product content check timed out but page loaded`);
+    }
+
+    // Select variants if available
+    await this.selectRandomVariant(page);
+
+    // Click "Add to Cart" button
+    console.log(`${await currentTime()} - [cart] Looking for add to cart button...`);
+    // const addToCartBtn = await getElement(page, FallbackLocators.addToCartButtons(), { timeout: 7000 });
+    const addToCartBtn = await getElement(page, ProductLocators.addToCartButton(), { timeout: 7000 });
+
+    if (!addToCartBtn) {
+      console.log(`${await currentTime()} - [cart] ❌ Add to cart button not found`);
+      throw new Error('Add to cart button not found');
+    }
+
+    await addToCartBtn.waitFor({ state: 'visible', timeout: 5000 });
+    console.log(`${await currentTime()} - [cart] Add to cart button is visible`);
+
+    const isEnabled = await addToCartBtn.isEnabled().catch(() => false);
+    if (!isEnabled) {
+      console.log(`${await currentTime()} - [cart] ❌ Add to cart button is disabled`);
+      throw new Error('Add to cart button is disabled (possibly out of stock or missing variant selection)');
+    }
+
+    console.log(`${await currentTime()} - [cart] Clicking add to cart button...`);
+    // Use a robust click
+    await addToCartBtn.click({ timeout: 5000 });
+    console.log(`${await currentTime()} - [cart] ✅ Add to cart button clicked`);
+
+    // Validate item was added by checking dialog
+    const wasAdded = await this.validateItemAdded(page);
+    if (!wasAdded) {
+      throw new Error('Item was not added to cart (dialog validation failed)');
+    }
+
+    console.log(`${await currentTime()} - [cart] Successfully added item from ${item.href.slice(0, 40)}...`);
+
+
+    const timestamp = await currentTime();
+    const screenshotName = `cart-add-success-${timestamp.replace(/[:.\s]/g, '-')}.png`;
+
+    console.log(`${timestamp} - [screenshot prodPg] ✅ Added screenshot of item ${idx+1} for  'test-results'`);
+
+    await this.page.screenshot({
+      fullPage: false,
+      path: `test-results/screenshots/${screenshotName}`
+    });
+
+    if (testInfo) {
+      const screenshot = await page.screenshot({ fullPage: false });
+      testInfo.attach(`cart-add-success-${idx}`, {
+        body: screenshot,
+        contentType: 'image/png'
+      });
+      console.log(`${await currentTime()} - [screenshot prodPg] ✅ Added screenshot of item ${idx + 1} for Playwright report`);
+    }
+
   }
 
 }

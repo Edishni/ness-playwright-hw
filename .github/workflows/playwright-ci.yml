@@ -34,6 +34,10 @@ jobs:
       env:
         CI: true
         HOME: /root
+        # If you have Moon or Grid, you can set them here:
+        # PLAYWRIGHT_WS: ws://moon.company.com/playwright/${{ matrix.browser }}/playwright-1.44.0
+        # GRID_URL: http://selenium-hub:4444/wd/hub
+
 
     # Upload Playwright HTML report
     - name: Upload Playwright Report

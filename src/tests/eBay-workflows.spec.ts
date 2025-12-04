@@ -11,6 +11,13 @@ const testData = loadTestDataForSuite('core-requirements');
 
 test.describe('eBay web shop - Search & Cart Workflow', () => {
 
+    test.beforeAll(async ({ browser }) => {
+        console.log("============= Browser details =================");
+        const version = browser.version();
+        const browserName = browser.browserType().name();
+        console.log(`Browser: ${browserName}, Version: ${version}`);
+    });
+
     // Setup teardown to close all pages and context after each test
     test.afterEach(async ({ page }, testInfo) => {
         try {
@@ -62,11 +69,11 @@ test.describe('eBay web shop - Search & Cart Workflow', () => {
                 expect(urls.length).toBeGreaterThanOrEqual(scenario.expectedMinResults);
 
                 // Collect URLs for cart addition
-                allUrls.push(...urls);
+                allUrls.push(...urls.map(item => item.href));
 
                 console.log(`${await currentTime()} - [${index + 1}] Found ${urls.length} items for "${scenario.query}"`);
                 urls.forEach((url, idx) => {
-                    console.log(`    ${idx + 1}. ${url.slice(0, 60)}...`);
+                    console.log(`    ${idx + 1}. ${url.href.slice(0, 60)}...`);
                 });
             }
         });
