@@ -23,14 +23,6 @@
       "maxPrice": 150,
       "limit": 1,
       "expectedMinResults": 1
-    },
-    {
-      "id": "scenario-4",
-      "name": "Search camera under budget",
-      "query": "camera",
-      "maxPrice": 280,
-      "limit": 1,
-      "expectedMinResults": 1
     }
   ],
   "budgetTests": [

@@ -145,6 +145,14 @@
     "watchlistButton": [
       { "type": "role", "value": "button", "name": "Add to watchlist" },
       { "type": "xpath", "value": "//button[contains(text(), 'Add to watchlist')]" }
+    ],
+    "getDialog": [
+      { "type": "css", "value": "div.lightbox-dialog[aria-hidden='false'] .lightbox-dialog__window" },
+      { "type": "xpath", "value": "//div[contains(@class, 'lightbox-dialog__window')]" }
+    ],
+    "getDialogHeader": [
+      { "type": "css", "value": "div.lightbox-dialog[aria-hidden='false'] .lightbox-dialog__window .ux-overlay__header"},
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-overlay__header') and contains(text(), 'Added')]" }
     ]
   },
   "cart": {
@@ -202,8 +210,8 @@
       { "type": "xpath", "value": "//div[contains(@class, 'lightbox-dialog__window')]" }
     ],
     "addedToCartHeader": [
-      { "type": "css", "value": ".ux-overlay__header:has-text('Added to cart')" },
-      { "type": "xpath", "value": "//div[contains(@class, 'ux-overlay__header') and contains(text(), 'Added to cart')]" }
+      { "type": "css", "value": "div.lightbox-dialog[aria-hidden='false'] .lightbox-dialog__window .ux-overlay__header"},
+      { "type": "xpath", "value": "//div[contains(@class, 'ux-overlay__header') and contains(text(), 'Added')]" }
     ],
     "anyDialogCloseButton": [
       { "type": "css", "value": "button[aria-label*='Close']" },

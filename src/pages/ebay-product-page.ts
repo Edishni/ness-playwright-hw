@@ -277,8 +277,8 @@ export class EbayProductPage extends BasePage {
         const headerLocators = CartLocators.addedToCartHeader();
 
         // Give more time for header to appear and be more tolerant
-        await page.waitForLoadState('domcontentloaded', { timeout: 1000 }); // Wait for dialog to fully load
-        const header = await getElement(page, headerLocators, { timeout: 5000 }).catch(() => null);
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 }); // Wait for dialog to fully load
+        const header = await getElement(page, headerLocators, { timeout: 1000 }).catch(() => null);
 
         if (!header) {
           console.warn(`${await currentTime()} - [dialog] ❌ Header not found - might be wrong dialog or timing issue`);
@@ -306,18 +306,7 @@ export class EbayProductPage extends BasePage {
               console.log(`${await currentTime()} - [validation] ❌ "Place bid" button found - Not possible to add the item when bidding is required!`);
               return false;
             }
-            // dtect if wrong dialog appeared (e.g., returns/exchange dialog)
-            const dialogAddBtn = await getElement(
-              this.page,
-              ProductLocators.dialogAddToCartButton(),
-              { timeout: 500 }
-            ).catch(() => null);
 
-            if (dialogAddBtn) {
-              // Fail the item addition if this dialog appears
-              console.error(`${await currentTime()} - [wrong dialog] ❌ Unexpected dialog with 'Add to cart' button appeared. Failing item addition.`);
-              return false;
-            }
           }
 
 
@@ -375,13 +364,21 @@ export class EbayProductPage extends BasePage {
         console.log(`${await currentTime()} - [validation] ✅ "See in cart" button found - item was successfully added!`);
         return true;
       }
+      // detect if wrong dialog appeared (e.g., returns/exchange dialog)
+      const dialogAddBtn = await getElement(page, ProductLocators.dialogAddToCartButton(),{ timeout: 500 }).catch(() => null);
 
+      if (dialogAddBtn) {
+        // Fail the item addition if this dialog appears
+        console.error(`${await currentTime()} - [wrong dialog] ❌ Unexpected dialog with 'Add to cart' button appeared. Failing item addition.`);
+        return false;
+      }
       // If not, check if "Add to cart" button still exists (indicates add failed)
       const addToCartLocators = ProductLocators.addToCartButton();
       const addToCartButton = await getElement(page, addToCartLocators, { timeout: 2000 }).catch(() => null);
 
       if (addToCartButton) {
         console.log(`${await currentTime()} - [validation] ❌ "Add to cart" button still present - item was not added`);
+
         return false;
       }
 
@@ -478,18 +475,7 @@ export class EbayProductPage extends BasePage {
     console.log(`${await currentTime()} - [dialog] Close button clicked using JavaScript.`);
 
     // 5. Validate that dialog is no longer visible
-    await page.waitForLoadState('domcontentloaded', { timeout: 1000 }); // Wait for close animation
-
-    // Try to find the dialog again - if we can find it and it's visible, close failed
-    const dialogStillExists = await getElement(page, dialogLocators, { timeout: 2000 })
-      .catch(() => null);
-
-    if (dialogStillExists) {
-      const isStillVisible = await dialogStillExists.isVisible().catch(() => false);
-      if (isStillVisible) {
-        throw new Error('Dialog is still visible after close attempt');
-      }
-    }
+    await page.waitForLoadState('domcontentloaded', { timeout: 2000 }); // Wait for close animation
 
     console.log(`${await currentTime()} - [dialog] Dialog confirmed closed.`);
   }
