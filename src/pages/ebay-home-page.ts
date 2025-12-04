@@ -208,7 +208,8 @@ export class EbayHomePage extends BasePage {
           .waitFor({ state: 'visible', timeout: 5000 })
           .catch(() => { });
 
-        await page.waitForTimeout(1000); // Stabilization delay
+        // await page.waitForLoadState('domcontentloaded', { timeout: 1000 }); // Stabilization delay
+        await page.waitForLoadState('domcontentloaded', { timeout: 2000 });
         console.log(`${await currentTime()} - [next nav] Successfully navigated to page ${currentPage}`);
       } catch (error) {
         console.warn(`${await currentTime()} - [next nav] ❌ Failed to navigate to next page: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -265,7 +266,7 @@ export class EbayHomePage extends BasePage {
         console.log(`${await currentTime()} - [filter] Step 1: Setting maximum price: ${maxPrice}`);
         await maxInput.clear();
         await maxInput.fill(maxPrice.toString());
-        await page.waitForTimeout(300); // Wait for field to update
+        await page.waitForLoadState('domcontentloaded', { timeout: 500 });; // Wait for field to update
 
         // Verify the value actually stuck and trigger form validation
         const actualMaxValue = await maxInput.inputValue();
@@ -276,12 +277,12 @@ export class EbayHomePage extends BasePage {
           await maxInput.focus();
           await maxInput.clear();
           await maxInput.fill(maxPrice.toString());
-          await page.waitForTimeout(200);
+          await page.waitForLoadState('domcontentloaded', { timeout: 500 });;
         }
 
         // Trigger form validation by pressing Tab or Enter to "commit" the value
         await maxInput.press('Tab');
-        await page.waitForTimeout(200);
+        await page.waitForLoadState('domcontentloaded', { timeout: 500 });;
         console.log(`${await currentTime()} - [filter] ✅ Max price set: ${maxPrice}`);
       }
 
@@ -290,13 +291,13 @@ export class EbayHomePage extends BasePage {
         console.log(`${await currentTime()} - [filter] Step 2: Setting minimum price: ${minPrice}`);
         await minInput.clear();
         await minInput.fill(minPrice.toString());
-        await page.waitForTimeout(200);
+        await page.waitForLoadState('domcontentloaded', { timeout: 500 });;
         await minInput.press('Tab'); // Trigger validation
         console.log(`${await currentTime()} - [filter] ✅ Min price set: ${minPrice}`);
       } else {
         console.log(`${await currentTime()} - [filter] Step 2: No min price in test config, clicking min field to activate form`);
         await minInput.click({ button: "left" }); // Click min field to activate the form as before
-        await page.waitForTimeout(200);
+        await page.waitForLoadState('domcontentloaded', { timeout: 500 });;
       }
 
       // Step 2.5: Verify submit button is enabled before clicking
@@ -315,9 +316,9 @@ export class EbayHomePage extends BasePage {
         console.warn(`${await currentTime()} - ❌ Submit button is DISABLED. Max: "${await maxInput.inputValue()}", Min: "${await minInput.inputValue()}"`);
         // Try one more time to activate the form by clicking both fields
         await maxInput.click();
-        await page.waitForTimeout(100);
+        await page.waitForLoadState('domcontentloaded', { timeout: 100 });
         await minInput.click();
-        await page.waitForTimeout(300);
+        await page.waitForLoadState('domcontentloaded', { timeout: 500 });;
 
         const stillDisabled = await applyButton.getAttribute('disabled');
         if (stillDisabled !== null) {
@@ -350,7 +351,7 @@ export class EbayHomePage extends BasePage {
       }
 
       // Additional wait for filter stabilization
-      await page.waitForTimeout(2000);
+      await page.waitForLoadState('domcontentloaded', { timeout: 2000 });
 
       console.log(`${await currentTime()} - [nav] ✅ Price filter process completed`);
       return true;

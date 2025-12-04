@@ -60,7 +60,7 @@ export class EbayProductPage extends BasePage {
               console.log(`${await currentTime()} - [variant] ✅ Dropdown clicked (attempt ${totalSelected + 1})`);
 
               // Wait for dropdown to open and stabilize (longer wait to prevent dropdown from closing)
-              await page.waitForTimeout(3000);
+              await page.waitForLoadState('domcontentloaded', { timeout: 3000 });
 
               // Verify dropdown actually opened
               console.log(`${await currentTime()} - [variant] Verifying dropdown opened...`);
@@ -73,7 +73,7 @@ export class EbayProductPage extends BasePage {
               }
 
               console.log(`${await currentTime()} - [variant] ✅ Dropdown opened successfully`);
-              await page.waitForTimeout(300); // Let options render
+              await page.waitForLoadState('domcontentloaded', { timeout: 500 });; // Let options render
 
               // Now select an option from the opened dropdown
               console.log(`${await currentTime()} - [variant] Selecting option from dropdown...`);
@@ -89,7 +89,7 @@ export class EbayProductPage extends BasePage {
                   try {
                     // Press Escape to close any open dropdown
                     await page.keyboard.press('Escape');
-                    await page.waitForTimeout(300);
+                    await page.waitForLoadState('domcontentloaded', { timeout: 500 });;
                   } catch (closeErr) {
                     console.warn(`${await currentTime()} - [variant] ❌ Could not close dropdown with Escape: ${closeErr}`);
                   }
@@ -228,7 +228,7 @@ export class EbayProductPage extends BasePage {
         console.log(`${await currentTime()} - [variant] ✅ Successfully clicked option using evaluation`);
 
         // Wait for page to update after selection
-        await page.waitForTimeout(1000);
+        await page.waitForLoadState('domcontentloaded', { timeout: 1000 });
         await page.waitForLoadState('domcontentloaded').catch(() => { });
 
         return true; // Success
@@ -256,18 +256,6 @@ export class EbayProductPage extends BasePage {
     const maxAttempts = 3;
     let attempt = 1;
 
-    // After clicking "Add to cart" button
-    const dialogAddBtn = await getElement(
-      this.page,
-      ProductLocators.dialogAddToCartButton(),
-      { timeout: 1500 }
-    ).catch(() => null);
-
-    if (dialogAddBtn) {
-      // Fail the item addition if this dialog appears
-      throw new Error(`[cart] Unexpected dialog with 'Add to cart' button appeared. Failing item addition.`);
-    }
-
     while (attempt <= maxAttempts) {
       console.log(`${await currentTime()} - [dialog] Attempt ${attempt}/${maxAttempts}: Looking for 'Added to cart' dialog...`);
 
@@ -289,7 +277,7 @@ export class EbayProductPage extends BasePage {
         const headerLocators = CartLocators.addedToCartHeader();
 
         // Give more time for header to appear and be more tolerant
-        await page.waitForTimeout(1000); // Wait for dialog to fully load
+        await page.waitForLoadState('domcontentloaded', { timeout: 1000 }); // Wait for dialog to fully load
         const header = await getElement(page, headerLocators, { timeout: 5000 }).catch(() => null);
 
         if (!header) {
@@ -318,6 +306,18 @@ export class EbayProductPage extends BasePage {
               console.log(`${await currentTime()} - [validation] ❌ "Place bid" button found - Not possible to add the item when bidding is required!`);
               return false;
             }
+            // dtect if wrong dialog appeared (e.g., returns/exchange dialog)
+            const dialogAddBtn = await getElement(
+              this.page,
+              ProductLocators.dialogAddToCartButton(),
+              { timeout: 500 }
+            ).catch(() => null);
+
+            if (dialogAddBtn) {
+              // Fail the item addition if this dialog appears
+              console.error(`${await currentTime()} - [wrong dialog] ❌ Unexpected dialog with 'Add to cart' button appeared. Failing item addition.`);
+              return false;
+            }
           }
 
 
@@ -331,7 +331,7 @@ export class EbayProductPage extends BasePage {
           }
 
           // Wait a bit before retrying
-          await page.waitForTimeout(1000);
+          await page.waitForLoadState('domcontentloaded', { timeout: 1000 });
           attempt++;
           continue;
         }
@@ -400,7 +400,7 @@ export class EbayProductPage extends BasePage {
    * @param page - Playwright page object
    */
   async closeAnyDialog(page: Page): Promise<void> {
-    console.log(`${await currentTime()} - [dialog] Attempting to close any open dialog...`);
+    console.log(`${await currentTime()} - [bad dialog] Attempting to close any open dialog...`);
 
     const closeDialogSelectors = CartLocators.anyDialogCloseButton();
     for (const selector of closeDialogSelectors) {
@@ -411,8 +411,8 @@ export class EbayProductPage extends BasePage {
 
         if (closeButton && await closeButton.isVisible()) {
           await closeButton.click();
-          console.log(`${await currentTime()} - [dialog] Closed dialog using selector: ${selector}`);
-          await page.waitForTimeout(500); // Wait for dialog to close
+          console.log(`${await currentTime()} - [bad dialog] Closed dialog using selector: ${selector}`);
+          await page.waitForLoadState('domcontentloaded', { timeout: 500 }); // Wait for dialog to close
           await closeButton.waitFor({ state: 'detached', timeout: 500 }).catch(async () => {
             await closeButton.waitFor({ state: 'hidden', timeout: 500 }).catch(() => { });
           });
@@ -425,11 +425,11 @@ export class EbayProductPage extends BasePage {
 
     // If no specific close button found, try ESC key
     try {
-      console.log(`${await currentTime()} - [dialog] No close button found, trying ESC key...`);
+      console.log(`${await currentTime()} - [bad dialog] No close button found, trying ESC key...`);
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(500);
+      await page.waitForLoadState('domcontentloaded', { timeout: 500 });
     } catch (error) {
-      console.warn(`${await currentTime()} - [dialog] Could not close dialog with ESC key`);
+      console.warn(`${await currentTime()} - [bad dialog] ❌ Could not close dialog with ESC key`);
     }
   }
 
@@ -450,7 +450,7 @@ export class EbayProductPage extends BasePage {
     console.log(`${await currentTime()} - [dialog] Dialog detected.`);
 
     // 2. Wait till it finishes loading (wait for dialog to be stable)
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded', { timeout: 2000 });
     console.log(`${await currentTime()} - [dialog] Dialog loading wait completed.`);
 
     // 3. Find the specific close button within the "Added to cart" dialog
@@ -478,7 +478,7 @@ export class EbayProductPage extends BasePage {
     console.log(`${await currentTime()} - [dialog] Close button clicked using JavaScript.`);
 
     // 5. Validate that dialog is no longer visible
-    await page.waitForTimeout(1000); // Wait for close animation
+    await page.waitForLoadState('domcontentloaded', { timeout: 1000 }); // Wait for close animation
 
     // Try to find the dialog again - if we can find it and it's visible, close failed
     const dialogStillExists = await getElement(page, dialogLocators, { timeout: 2000 })
