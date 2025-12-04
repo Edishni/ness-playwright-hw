@@ -102,6 +102,11 @@
       { "type": "role", "value": "link", "name": "Add to cart" },
       { "type": "xpath", "value": "//a[@data-testid='x-atc-action' and .//span[contains(text(), 'Add to cart')]]" }
     ],
+    "dialogAddToCartButton": [
+      {
+        "type": "css","value": ".lightbox-dialog[aria-hidden='false'] .lightbox-dialog__window button.x-returns-interstitial__continue-btn.btn--primary[type='button']"
+      }
+    ],
     "seeInCartButton": [
       { "type": "css", "value": "[id='x-atc-action']" },
       { "type": "role", "value": "link", "name": "See in cart" },
@@ -193,7 +198,7 @@
       { "type": "xpath", "value": "//a[contains(text(), 'Continue shopping')]" }
     ],
     "addedToCartDialog": [
-      { "type": "css", "value": ".lightbox-dialog__window" },
+      { "type": "css", "value": "div.lightbox-dialog[aria-hidden='false'] .lightbox-dialog__window" },
       { "type": "xpath", "value": "//div[contains(@class, 'lightbox-dialog__window')]" }
     ],
     "addedToCartHeader": [

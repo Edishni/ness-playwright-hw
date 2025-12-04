@@ -7,7 +7,7 @@ export default defineConfig({
     testIgnore: process.env.CI ? ['**/temp-tests/**'] : ['**/temp-tests/**'], // Allow core tests in CI
     timeout: process.env.CI ? 10 * 60 * 1000 : 15 * 60 * 1000, // 10 min in CI, 15 min local
     expect: { timeout: process.env.CI ? 15000 : 5000 }, // Longer waits in CI
-    retries: process.env.CI ? 2 : 0,  // 2 retries in CI, none locally
+    retries: process.env.CI ? 1 : 0,  // 2 retries in CI, none locally
 
     // Global setup and teardown
     globalSetup: path.resolve(__dirname, 'global-setup.ts'),

@@ -256,6 +256,18 @@ export class EbayProductPage extends BasePage {
     const maxAttempts = 3;
     let attempt = 1;
 
+    // After clicking "Add to cart" button
+    const dialogAddBtn = await getElement(
+      this.page,
+      ProductLocators.dialogAddToCartButton(),
+      { timeout: 1500 }
+    ).catch(() => null);
+
+    if (dialogAddBtn) {
+      // Fail the item addition if this dialog appears
+      throw new Error(`[cart] Unexpected dialog with 'Add to cart' button appeared. Failing item addition.`);
+    }
+
     while (attempt <= maxAttempts) {
       console.log(`${await currentTime()} - [dialog] Attempt ${attempt}/${maxAttempts}: Looking for 'Added to cart' dialog...`);
 
@@ -263,7 +275,6 @@ export class EbayProductPage extends BasePage {
         // Wait for any dialog to appear
         const dialogLocators = CartLocators.addedToCartDialog();
         const dialog = await getElement(page, dialogLocators, { timeout: 7000 }).catch(() => null);
-
         if (!dialog) {
           console.warn(`${await currentTime()} - [dialog] ❌ No dialog appeared within timeout (attempt ${attempt})`);
           if (attempt === maxAttempts) return false;
@@ -308,6 +319,7 @@ export class EbayProductPage extends BasePage {
               return false;
             }
           }
+
 
           console.log(`${await currentTime()} - [dialog] Closing wrong dialog and retrying...`);
           // Close the wrong dialog
@@ -593,11 +605,11 @@ export class EbayProductPage extends BasePage {
     },
     testInfo?: any
   ): Promise<void> {
-                    console.log(`    ${idx+1}. Trying to open item page and add to cart:`);
-                    console.log(`    ${item.title.slice(0, 60)}...`);
-                    console.log(`    ${item.href.slice(0, 60)}...`);
-                    console.log(`    ${item.price}`);
-                    
+    console.log(`    ${idx + 1}. Trying to open item page and add to cart:`);
+    console.log(`    ${item.title.slice(0, 60)}...`);
+    console.log(`    ${item.href.slice(0, 60)}...`);
+    console.log(`    ${item.price}`);
+
     // Wait for product page essentials to load
     try {
       await page.waitForSelector('#mainContent, .product-details, .notranslate', { timeout: 8000 });
@@ -645,7 +657,7 @@ export class EbayProductPage extends BasePage {
     const timestamp = await currentTime();
     const screenshotName = `cart-add-success-${timestamp.replace(/[:.\s]/g, '-')}.png`;
 
-    console.log(`${timestamp} - [screenshot prodPg] ✅ Added screenshot of item ${idx+1} for  'test-results'`);
+    console.log(`${timestamp} - [screenshot prodPg] ✅ Added screenshot of item ${idx + 1} for  'test-results'`);
 
     await this.page.screenshot({
       fullPage: false,

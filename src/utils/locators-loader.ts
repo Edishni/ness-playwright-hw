@@ -83,6 +83,7 @@ export const ProductLocators = {
   productTitle: () => locatorsLoader.getLocators('product', 'productTitle'),
   productPrice: () => locatorsLoader.getLocators('product', 'productPrice'),
   addToCartButton: () => locatorsLoader.getLocators('product', 'addToCartButton'),
+  dialogAddToCartButton: () => locatorsLoader.getLocators('product', 'dialogAddToCartButton'),
   seeInCartButton: () => locatorsLoader.getLocators('product', 'seeInCartButton'),
   placeBidButton: () => locatorsLoader.getLocators('product', 'placeBidButton'),
   buyNowButton: () => locatorsLoader.getLocators('product', 'buyNowButton'),
